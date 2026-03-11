@@ -25,6 +25,28 @@ router.get("/mine", requireAuth, async (req: AuthedRequest, res) => {
   }
 });
 
+router.get("/admin/all", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    if (!req.authUser) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    if (req.authUser.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
+    const logs = await db
+      .select()
+      .from(refrigerantLogs)
+      .orderBy(desc(refrigerantLogs.submittedAt));
+
+    return res.json({ logs });
+  } catch (error) {
+    console.error("Admin get all refrigerant logs error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 router.post("/", requireAuth, async (req: AuthedRequest, res) => {
   try {
     const {
