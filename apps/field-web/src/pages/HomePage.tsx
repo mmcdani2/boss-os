@@ -15,7 +15,7 @@ function ModuleCard({
   return (
     <Link
       to={to}
-      className="block rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
+      className="block rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
     >
       <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
         {eyebrow}
@@ -52,7 +52,7 @@ export default function HomePage() {
           description="Review your recent refrigerant submissions from the field."
         />
 
-        <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
+        <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
           <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
             Coming Soon
           </div>

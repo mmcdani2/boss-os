@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+﻿import React, { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { clearStoredToken, getStoredToken } from '../lib/auth'
 
@@ -28,10 +28,7 @@ export default function FieldLayout ({
   const location = useLocation()
   const token = useMemo(() => getStoredToken(), [location.pathname])
 
-  const isLogin = location.pathname === '/login'
   const isHome = location.pathname === '/home'
-  const isLog = location.pathname === '/refrigerant-log'
-  const isMine = location.pathname === '/my-logs'
 
   return (
     <div className='min-h-screen bg-black text-white'>
@@ -65,12 +62,6 @@ export default function FieldLayout ({
               <nav className='mt-4 flex flex-wrap gap-2'>
                 <Link to='/home' className={navClass(isHome)}>
                   Home
-                </Link>
-                <Link to='/refrigerant-log' className={navClass(isLog)}>
-                  New Log
-                </Link>
-                <Link to='/my-logs' className={navClass(isMine)}>
-                  My Logs
                 </Link>
               </nav>
             ) : null}

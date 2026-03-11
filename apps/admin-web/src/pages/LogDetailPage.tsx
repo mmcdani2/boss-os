@@ -84,20 +84,20 @@ export default function LogDetailPage() {
       subtitle="Review submission details, technician information, and recorded refrigerant activity."
     >
       {loading ? (
-        <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
+        <div className="rounded-3xl border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
           Loading log...
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-[24px] border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
           {error}
         </div>
       ) : null}
 
       {!loading && !error && log ? (
         <div className="grid gap-5">
-          <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
+          <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
             <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
               Submission
             </div>
@@ -125,7 +125,7 @@ export default function LogDetailPage() {
             <DetailRow label="Submitted At" value={log.submittedAt} />
           </div>
 
-          <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
+          <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
             <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
               Notes
             </div>

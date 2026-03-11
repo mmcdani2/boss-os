@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import RefrigerantLogPage from './pages/RefrigerantLogPage'
 import MyLogsPage from './pages/MyLogsPage'
+import LogDetailPage from './pages/LogDetailPage'
 
 function RequireAuth ({ children }: { children: React.ReactNode }) {
   const token = getStoredToken()
@@ -41,6 +42,14 @@ function App () {
           element={
             <RequireAuth>
               <MyLogsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path='/logs/:id'
+          element={
+            <RequireAuth>
+              <LogDetailPage />
             </RequireAuth>
           }
         />

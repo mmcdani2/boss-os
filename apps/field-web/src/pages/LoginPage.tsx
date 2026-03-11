@@ -60,7 +60,7 @@ export default function LoginPage () {
       <div className='mx-auto max-w-xl'>
         <form
           onSubmit={handleSubmit}
-          className='rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl sm:p-6'
+          className='rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl sm:p-6'
         >
           <div className='grid gap-5'>
             <div className='grid gap-2'>

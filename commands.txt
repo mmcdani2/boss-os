@@ -1,0 +1,9 @@
+cd C:\Users\TENNE\Documents\Github-Projects\field-cheat-sheets-realdb
+pnpm --filter api dev
+
+cd C:\Users\TENNE\Documents\Github-Projects\field-cheat-sheets-realdb
+pnpm --filter admin-web dev
+
+cd C:\Users\TENNE\Documents\Github-Projects\field-cheat-sheets-realdb
+pnpm --filter field-web dev
+

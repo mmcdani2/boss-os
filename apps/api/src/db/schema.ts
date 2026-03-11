@@ -1,4 +1,15 @@
-﻿import { pgTable, uuid, varchar, boolean, timestamp, decimal, text } from "drizzle-orm/pg-core";
+﻿import { pgTable, uuid, varchar, boolean, timestamp, decimal, text, index } from "drizzle-orm/pg-core";
+
+export const companies = pgTable("companies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 120 }).notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+}, (table) => ({
+  slugIdx: index("companies_slug_idx").on(table.slug)
+}));
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),

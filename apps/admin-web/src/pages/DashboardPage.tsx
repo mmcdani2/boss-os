@@ -18,7 +18,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
+    <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
       <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-white/55">
         {label}
       </div>
@@ -73,13 +73,13 @@ export default function DashboardPage() {
       subtitle="Quick view of refrigerant activity, technician usage, and today’s field submissions."
     >
       {loading ? (
-        <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
+        <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
           Loading dashboard...
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-[24px] border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
           {error}
         </div>
       ) : null}
@@ -93,7 +93,7 @@ export default function DashboardPage() {
       ) : null}
 
       {!loading && !error ? (
-        <div className="mt-6 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
+        <div className="mt-6 rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl">
           <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
             Snapshot
           </div>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+﻿import React, { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { clearStoredToken, getStoredToken } from '../lib/auth'
 
@@ -28,9 +28,9 @@ export default function Layout ({
   const location = useLocation()
   const token = useMemo(() => getStoredToken(), [location.pathname])
 
-  const isLogin = location.pathname === '/login'
   const isDashboard = location.pathname === '/dashboard'
   const isLogs = location.pathname.startsWith('/logs')
+  const isSettings = location.pathname === '/settings'
 
   return (
     <div className='min-h-screen bg-black text-white'>
@@ -67,6 +67,9 @@ export default function Layout ({
                 </Link>
                 <Link to='/logs' className={navClass(isLogs)}>
                   Logs
+                </Link>
+                <Link to='/settings' className={navClass(isSettings)}>
+                  Settings
                 </Link>
               </nav>
             ) : null}

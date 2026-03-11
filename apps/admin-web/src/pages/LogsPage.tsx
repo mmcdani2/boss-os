@@ -19,7 +19,7 @@ function LogCard({ log }: { log: RefrigerantLog }) {
   return (
     <Link
       to={`/logs/${log.id}`}
-      className="block rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
+      className="block rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -100,13 +100,13 @@ export default function LogsPage() {
       subtitle="Review all technician submissions, inspect details, and drill into individual records."
     >
       {loading ? (
-        <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
+        <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
           Loading logs...
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-[24px] border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
           {error}
         </div>
       ) : null}
@@ -114,7 +114,7 @@ export default function LogsPage() {
       {!loading && !error ? (
         <div className="grid gap-4">
           {logs.length === 0 ? (
-            <div className="rounded-[24px] border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl">
+            <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl">
               No logs found.
             </div>
           ) : (
