@@ -64,6 +64,7 @@ export const refrigerantLogs = pgTable("refrigerant_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id),
   companyKey: varchar("company_key", { length: 50 }).notNull(),
+  divisionKey: varchar("division_key", { length: 100 }),
   techNameSnapshot: varchar("tech_name_snapshot", { length: 255 }).notNull(),
   customerName: varchar("customer_name", { length: 255 }),
   jobNumber: varchar("job_number", { length: 100 }),

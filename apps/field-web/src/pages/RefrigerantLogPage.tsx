@@ -60,6 +60,7 @@ export default function RefrigerantLogPage() {
         },
         body: JSON.stringify({
           companyKey: "urban-mechanical",
+          divisionKey: "hvac",
           customerName: cleanString(form.customerName),
           jobNumber: cleanString(form.jobNumber),
           city: cleanString(form.city),

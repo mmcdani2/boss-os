@@ -74,35 +74,28 @@ export default function LogsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadInitialData() {
+    async function loadDivisions() {
       try {
         setLoadingDivisions(true);
-        setLoadingLogs(true);
         setError("");
 
         const token = getStoredToken();
-        const headers = { Authorization: `Bearer ${token}` };
 
-        const [divisionsRes, logsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/divisions`, { headers }),
-          fetch(`${API_BASE}/api/refrigerant-logs/admin/all`, { headers }),
-        ]);
+        const res = await fetch(`${API_BASE}/api/divisions`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        const divisionsData = await divisionsRes.json();
-        const logsData = await logsRes.json();
+        const data = await res.json();
 
-        if (!divisionsRes.ok) {
-          setError(divisionsData?.error || "Failed to load divisions.");
+        if (!res.ok) {
+          setError(data?.error || "Failed to load divisions.");
           return;
         }
 
-        if (!logsRes.ok) {
-          setError(logsData?.error || "Failed to load logs.");
-          return;
-        }
-
-        const nextDivisions = Array.isArray(divisionsData.divisions)
-          ? divisionsData.divisions.filter((division: Division) => division.isActive)
+        const nextDivisions = Array.isArray(data.divisions)
+          ? data.divisions.filter((division: Division) => division.isActive)
           : [];
 
         setDivisions(nextDivisions);
@@ -111,18 +104,20 @@ export default function LogsPage() {
           const hvacDivision = nextDivisions.find((division: Division) => division.key === "hvac");
           setSelectedDivisionId(hvacDivision?.id || nextDivisions[0].id);
         }
-
-        setLogs(Array.isArray(logsData.logs) ? logsData.logs : []);
       } catch {
         setError("Could not reach API.");
       } finally {
         setLoadingDivisions(false);
-        setLoadingLogs(false);
       }
     }
 
-    loadInitialData();
+    loadDivisions();
   }, []);
+
+  const selectedDivision = useMemo(
+    () => divisions.find((division) => division.id === selectedDivisionId) || null,
+    [divisions, selectedDivisionId]
+  );
 
   useEffect(() => {
     async function loadDivisionModules() {
@@ -162,10 +157,45 @@ export default function LogsPage() {
     loadDivisionModules();
   }, [selectedDivisionId]);
 
-  const selectedDivision = useMemo(
-    () => divisions.find((division) => division.id === selectedDivisionId) || null,
-    [divisions, selectedDivisionId]
-  );
+  useEffect(() => {
+    async function loadLogs() {
+      if (!selectedDivision?.key) {
+        setLogs([]);
+        setLoadingLogs(false);
+        return;
+      }
+
+      try {
+        setLoadingLogs(true);
+        setError("");
+
+        const token = getStoredToken();
+        const url = new URL(`${API_BASE}/api/refrigerant-logs/admin/all`);
+        url.searchParams.set("divisionKey", selectedDivision.key);
+
+        const res = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data?.error || "Failed to load logs.");
+          return;
+        }
+
+        setLogs(Array.isArray(data.logs) ? data.logs : []);
+      } catch {
+        setError("Could not reach API.");
+      } finally {
+        setLoadingLogs(false);
+      }
+    }
+
+    loadLogs();
+  }, [selectedDivision?.key]);
 
   const enabledModules = useMemo(
     () => modules.filter((row) => row.isEnabled && row.module.isActive),
@@ -254,7 +284,7 @@ export default function LogsPage() {
                         Refrigerant Log Records
                       </h3>
                       <p className="mt-2 text-sm text-white/65 sm:text-base">
-                        Refrigerant reporting is enabled for this division, so the records are live below.
+                        Refrigerant reporting is enabled for this division, so only that division’s records are live below.
                       </p>
                     </div>
 
@@ -266,7 +296,7 @@ export default function LogsPage() {
                       <div className="grid gap-4">
                         {logs.length === 0 ? (
                           <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl">
-                            No logs found.
+                            No logs found for this division.
                           </div>
                         ) : (
                           logs.map((log) => <RefrigerantLogCard key={log.id} log={log} />)

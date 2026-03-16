@@ -1,84 +1,98 @@
-import { Router } from "express";
+﻿import { Router } from "express";
+import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { refrigerantLogs } from "../../db/schema.js";
+import { refrigerantLogs, users } from "../../db/schema.js";
 import {
   requireAuth,
   type AuthedRequest,
 } from "../../middleware/require-auth.js";
 
-const router = Router();
+type CreateRefrigerantLogBody = {
+  companyKey?: string;
+  divisionKey?: string;
+  customerName?: string | null;
+  jobNumber?: string | null;
+  city?: string | null;
+  state?: string | null;
+  equipmentType?: string | null;
+  refrigerantType?: string;
+  poundsAdded?: string | number | null;
+  poundsRecovered?: string | number | null;
+  leakSuspected?: boolean;
+  notes?: string | null;
+};
 
-router.post("/", requireAuth, async (req: AuthedRequest, res) => {
+function cleanString(value?: string | null) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : null;
+}
+
+export async function createRefrigerantLog(req: AuthedRequest, res: any) {
   try {
-    const {
-      companyKey,
-      customerName,
-      jobNumber,
-      city,
-      state,
-      equipmentType,
-      refrigerantType,
-      poundsAdded,
-      poundsRecovered,
-      leakSuspected,
-      notes,
-    } = req.body as {
-      companyKey?: string;
-      customerName?: string;
-      jobNumber?: string;
-      city?: string;
-      state?: string;
-      equipmentType?: string;
-      refrigerantType?: string;
-      poundsAdded?: number | string | null;
-      poundsRecovered?: number | string | null;
-      leakSuspected?: boolean;
-      notes?: string;
-    };
+    const authUser = req.authUser;
 
-    if (!req.authUser) {
+    if (!authUser?.sub) {
       return res.status(401).json({ error: "Unauthorized." });
     }
 
-    if (!companyKey || !refrigerantType) {
-      return res
-        .status(400)
-        .json({ error: "companyKey and refrigerantType are required." });
+    const body = (req.body ?? {}) as CreateRefrigerantLogBody;
+
+    const companyKey = cleanString(body.companyKey);
+    const divisionKey = cleanString(body.divisionKey);
+    const refrigerantType = cleanString(body.refrigerantType);
+
+    if (!companyKey) {
+      return res.status(400).json({ error: "companyKey is required." });
+    }
+
+    if (!refrigerantType) {
+      return res.status(400).json({ error: "refrigerantType is required." });
+    }
+
+    const userRows = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, authUser.sub))
+      .limit(1);
+
+    const user = userRows[0];
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
     }
 
     const inserted = await db
       .insert(refrigerantLogs)
       .values({
-        userId: req.authUser.sub,
+        userId: user.id,
         companyKey,
-        techNameSnapshot: req.authUser.fullName,
-        customerName: customerName ?? null,
-        jobNumber: jobNumber ?? null,
-        city: city ?? null,
-        state: state ?? null,
-        equipmentType: equipmentType ?? null,
+        divisionKey,
+        techNameSnapshot: user.fullName,
+        customerName: cleanString(body.customerName),
+        jobNumber: cleanString(body.jobNumber),
+        city: cleanString(body.city),
+        state: cleanString(body.state),
+        equipmentType: cleanString(body.equipmentType),
         refrigerantType,
-        poundsAdded:
-          poundsAdded != null && poundsAdded !== ""
-            ? String(poundsAdded)
-            : null,
-        poundsRecovered:
-          poundsRecovered != null && poundsRecovered !== ""
-            ? String(poundsRecovered)
-            : null,
-        leakSuspected: Boolean(leakSuspected),
-        notes: notes ?? null,
+        poundsAdded: body.poundsAdded ?? null,
+        poundsRecovered: body.poundsRecovered ?? null,
+        leakSuspected: Boolean(body.leakSuspected),
+        notes: cleanString(body.notes),
       })
       .returning();
 
     return res.status(201).json({
-      message: "Refrigerant log created.",
       log: inserted[0],
     });
   } catch (error) {
     console.error("Create refrigerant log error:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
-});
+}
+
+const router = Router();
+
+router.post("/", requireAuth, createRefrigerantLog);
 
 export default router;

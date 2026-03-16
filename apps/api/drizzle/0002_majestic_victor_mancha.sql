@@ -1,0 +1,1 @@
+ALTER TABLE "refrigerant_logs" ADD COLUMN "division_key" varchar(100);
