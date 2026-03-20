@@ -3,6 +3,7 @@ import cors from "cors";
 import express from "express";
 import authRoutes from "./routes/auth/index.js";
 import refrigerantLogRoutes from "./routes/refrigerant-logs/index.js";
+import reimbursementRequestRoutes from "./routes/reimbursement-requests/index.js";
 import sprayFoamLogRoutes from "./routes/spray-foam-logs/index.js";
 import companyRoutes from "./routes/company/index.js";
 import divisionRoutes from "./routes/divisions/index.js";
@@ -24,6 +25,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/refrigerant-logs", refrigerantLogRoutes);
+app.use("/api/reimbursement-requests", reimbursementRequestRoutes);
 app.use("/api/spray-foam-logs", sprayFoamLogRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/divisions", divisionRoutes);

@@ -132,9 +132,9 @@ async function ensureDivisionModule(
     })
     .returning();
 
-  console.log(
-    `Division module created: ${divisionId}/${moduleId} -> ${isEnabled ? "enabled" : "disabled"}`
-  );
+    console.log(
+      `Division module created: ${divisionId}/${moduleId} -> ${isEnabled ? "enabled" : "disabled"}`
+    );
 
   return inserted[0];
 }
@@ -177,16 +177,18 @@ async function main() {
   const company = await ensureCompany();
 
   const hvacDivision = await ensureDivision(company.id, "hvac", "HVAC");
-  const sprayFoamDivision = await ensureDivision(
-    company.id,
-    "spray-foam",
-    "Spray Foam"
-  );
+  const sprayFoamDivision = await ensureDivision(company.id, "spray-foam", "Spray Foam");
 
   const refrigerantLogModule = await ensureModule(
     "refrigerant-log",
     "Refrigerant Log",
     "reports"
+  );
+
+  const reimbursementRequestModule = await ensureModule(
+    "reimbursement-request",
+    "Reimbursement Request",
+    "operations"
   );
 
   const sprayFoamJobLogModule = await ensureModule(
@@ -197,6 +199,10 @@ async function main() {
 
   await ensureDivisionModule(hvacDivision.id, refrigerantLogModule.id, true);
   await ensureDivisionModule(sprayFoamDivision.id, sprayFoamJobLogModule.id, true);
+
+  // Global module only. Leave disabled by default until assigned in division detail.
+  await ensureDivisionModule(hvacDivision.id, reimbursementRequestModule.id, false);
+  await ensureDivisionModule(sprayFoamDivision.id, reimbursementRequestModule.id, false);
 
   await ensureAdminUser();
 

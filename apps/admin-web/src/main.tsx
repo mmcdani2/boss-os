@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import LogsPage from "./pages/LogsPage";
 import LogDetailPage from "./pages/LogDetailPage";
+import ReimbursementRequestDetailPage from "./pages/ReimbursementRequestDetailPage";
 import DivisionsPage from "./pages/DivisionsPage";
 import DivisionDetailPage from "./pages/DivisionDetailPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -45,6 +46,14 @@ function App() {
           element={
             <RequireAuth>
               <LogDetailPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/reimbursement-requests/:id"
+          element={
+            <RequireAuth>
+              <ReimbursementRequestDetailPage />
             </RequireAuth>
           }
         />

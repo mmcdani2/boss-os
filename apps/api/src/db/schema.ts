@@ -9,6 +9,7 @@
   index,
   integer,
   date,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const companies = pgTable(
@@ -79,6 +80,24 @@ export const divisionModules = pgTable(
   })
 );
 
+export const quickEstimateCalculatorSettings = pgTable(
+  "quick_estimate_calculator_settings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    divisionId: uuid("division_id").notNull().references(() => divisions.id),
+    laborRate: decimal("labor_rate", { precision: 10, scale: 2 }).notNull().default("40.00"),
+    pricingTiers: text("pricing_tiers").notNull().default("0.35,0.4,0.5"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    divisionIdx: index("quick_estimate_calculator_settings_division_id_idx").on(table.divisionId),
+    divisionUniqueIdx: uniqueIndex("quick_estimate_calculator_settings_division_id_unique").on(
+      table.divisionId
+    ),
+  })
+);
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -111,6 +130,41 @@ export const refrigerantLogs = pgTable("refrigerant_logs", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const reimbursementRequests = pgTable(
+  "reimbursement_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull().references(() => users.id),
+    companyKey: varchar("company_key", { length: 50 }).notNull(),
+    divisionKey: varchar("division_key", { length: 100 }),
+    techNameSnapshot: varchar("tech_name_snapshot", { length: 255 }).notNull(),
+    amountSpent: decimal("amount_spent", { precision: 10, scale: 2 }).notNull(),
+    purchaseDate: date("purchase_date").notNull(),
+    vendor: varchar("vendor", { length: 255 }).notNull(),
+    category: varchar("category", { length: 100 }).notNull(),
+    paymentMethod: varchar("payment_method", { length: 100 }).notNull(),
+    purpose: text("purpose").notNull(),
+    tiedToJob: boolean("tied_to_job").notNull().default(false),
+    jobNumber: varchar("job_number", { length: 100 }),
+    notes: text("notes"),
+    receiptUploaded: boolean("receipt_uploaded").notNull().default(false),
+    urgentReimbursementNeeded: boolean("urgent_reimbursement_needed").notNull().default(false),
+    status: varchar("status", { length: 50 }).notNull().default("submitted"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+    reimbursementDate: date("reimbursement_date"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index("reimbursement_requests_user_id_idx").on(table.userId),
+    divisionIdx: index("reimbursement_requests_division_key_idx").on(table.divisionKey),
+    statusIdx: index("reimbursement_requests_status_idx").on(table.status),
+    submittedIdx: index("reimbursement_requests_submitted_at_idx").on(table.submittedAt),
+  })
+);
+
 export const sprayFoamJobLogs = pgTable(
   "spray_foam_job_logs",
   {
@@ -121,7 +175,6 @@ export const sprayFoamJobLogs = pgTable(
     techNameSnapshot: varchar("tech_name_snapshot", { length: 255 }).notNull(),
     customerName: varchar("customer_name", { length: 255 }),
     jobNumber: varchar("job_number", { length: 100 }),
-
     jobDate: date("job_date"),
     crewLead: varchar("crew_lead", { length: 255 }),
     helpersText: text("helpers_text"),
@@ -134,11 +187,9 @@ export const sprayFoamJobLogs = pgTable(
     downtimeReason: text("downtime_reason"),
     otherNotes: text("other_notes"),
     photosUploadedToHcp: boolean("photos_uploaded_to_hcp").notNull().default(false),
-
     city: varchar("city", { length: 120 }),
     state: varchar("state", { length: 50 }),
     notes: text("notes"),
-
     submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

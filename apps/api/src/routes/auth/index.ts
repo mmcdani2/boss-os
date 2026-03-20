@@ -1,48 +1,44 @@
 ﻿import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { divisionModules, divisions, modules, users } from "../../db/schema.js";
-import {
-  requireAuth,
-  type AuthedRequest,
-} from "../../middleware/require-auth.js";
+import { requireAuth, type AuthedRequest } from "../../middleware/require-auth.js";
 
 const router = Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+
+const MODULES_BY_DIVISION: Record<string, string[]> = {
+  hvac: ["quick-estimate-calculator", "refrigerant-log", "reimbursement-request"],
+  "spray-foam": ["reimbursement-request", "spray-foam-job-log"],
+};
+
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body as {
-      email?: string;
-      password?: string;
-    };
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const password = String(req.body?.password || "");
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Email and password are required." });
+      return res.status(400).json({ error: "Email and password are required." });
     }
 
-    const found = await db
+    const rows = await db
       .select()
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
 
-    const user = found[0];
+    const user = rows[0];
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    if (!user.isActive) {
-      return res.status(403).json({ error: "User is inactive." });
-    }
+    const valid = await bcrypt.compare(password, user.passwordHash);
 
-    const passwordOk = await bcrypt.compare(password, user.passwordHash);
-
-    if (!passwordOk) {
+    if (!valid) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
@@ -53,8 +49,8 @@ router.post("/login", async (req, res) => {
         role: user.role,
         fullName: user.fullName,
       },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "7d" },
+      JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
     return res.json({
@@ -73,73 +69,96 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", requireAuth, async (req: AuthedRequest, res) => {
-  return res.json({
-    user: req.authUser,
-  });
+  try {
+    const authUser = req.authUser;
+
+    if (!authUser?.sub) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    const rows = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        fullName: users.fullName,
+        role: users.role,
+        isActive: users.isActive,
+      })
+      .from(users)
+      .where(eq(users.id, authUser.sub))
+      .limit(1);
+
+    const user = rows[0];
+
+    if (!user || !user.isActive) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({ user });
+  } catch (error) {
+    console.error("Get me error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 router.get("/launcher", requireAuth, async (_req: AuthedRequest, res) => {
   try {
-    const rows = await db
+    const divisionRows = await db
       .select({
-        divisionId: divisions.id,
-        divisionKey: divisions.key,
-        divisionName: divisions.name,
-        divisionIsActive: divisions.isActive,
-        moduleId: modules.id,
-        moduleKey: modules.key,
-        moduleName: modules.name,
-        moduleCategory: modules.category,
-        moduleIsActive: modules.isActive,
-        isEnabled: divisionModules.isEnabled,
+        id: divisions.id,
+        key: divisions.key,
+        name: divisions.name,
+        isActive: divisions.isActive,
       })
-      .from(divisionModules)
-      .innerJoin(divisions, eq(divisionModules.divisionId, divisions.id))
-      .innerJoin(modules, eq(divisionModules.moduleId, modules.id))
-      .orderBy(asc(divisions.name), asc(modules.name));
+      .from(divisions)
+      .where(eq(divisions.isActive, true))
+      .orderBy(asc(divisions.name));
 
-    const divisionMap = new Map<
-      string,
-      {
-        id: string;
-        key: string;
-        name: string;
-        modules: Array<{
-          id: string;
-          key: string;
-          name: string;
-          category: string;
-        }>;
-      }
-    >();
+    const result = [];
 
-    for (const row of rows) {
-      if (!row.divisionIsActive || !row.moduleIsActive || !row.isEnabled) {
+    for (const division of divisionRows) {
+      const allowedKeys = MODULES_BY_DIVISION[division.key] ?? [];
+
+      if (allowedKeys.length === 0) {
+        result.push({
+          id: division.id,
+          key: division.key,
+          name: division.name,
+          modules: [],
+        });
         continue;
       }
 
-      if (!divisionMap.has(row.divisionId)) {
-        divisionMap.set(row.divisionId, {
-          id: row.divisionId,
-          key: row.divisionKey,
-          name: row.divisionName,
-          modules: [],
-        });
-      }
+      const moduleRows = await db
+        .select({
+          id: modules.id,
+          key: modules.key,
+          name: modules.name,
+          category: modules.category,
+        })
+        .from(divisionModules)
+        .innerJoin(modules, eq(divisionModules.moduleId, modules.id))
+        .where(
+          and(
+            eq(divisionModules.divisionId, division.id),
+            eq(divisionModules.isEnabled, true),
+            eq(modules.isActive, true),
+            inArray(modules.key, allowedKeys)
+          )
+        )
+        .orderBy(asc(modules.name));
 
-      divisionMap.get(row.divisionId)!.modules.push({
-        id: row.moduleId,
-        key: row.moduleKey,
-        name: row.moduleName,
-        category: row.moduleCategory,
+      result.push({
+        id: division.id,
+        key: division.key,
+        name: division.name,
+        modules: moduleRows,
       });
     }
 
-    return res.json({
-      divisions: Array.from(divisionMap.values()),
-    });
+    return res.json({ divisions: result });
   } catch (error) {
-    console.error("Launcher error:", error);
+    console.error("Get launcher error:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
 });

@@ -19,8 +19,12 @@ type LauncherDivision = {
 
 function moduleRoute(key: string) {
   switch (key) {
+    case "quick-estimate-calculator":
+      return "/quick-estimate-calculator";
     case "refrigerant-log":
       return "/refrigerant-log";
+    case "reimbursement-request":
+      return "/reimbursement-request";
     case "spray-foam-job-log":
       return "/spray-foam-job-log";
     default:
@@ -121,7 +125,7 @@ export default function DivisionModulesPage() {
       }
     }
 
-    loadLauncher();
+    void loadLauncher();
   }, []);
 
   const division = useMemo(

@@ -1,7 +1,11 @@
 ﻿import { Router } from "express";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { sprayFoamJobLogLines, sprayFoamJobLogs } from "../../db/schema.js";
+import {
+  sprayFoamJobLogLines,
+  sprayFoamJobLogs,
+  sprayFoamMaterialLines,
+} from "../../db/schema.js";
 import {
   requireAuth,
   type AuthedRequest,
@@ -33,22 +37,30 @@ router.get("/admin/all", requireAuth, async (req: AuthedRequest, res) => {
           .from(sprayFoamJobLogs)
           .orderBy(desc(sprayFoamJobLogs.submittedAt));
 
-    const logsWithLines = await Promise.all(
+    const logsWithChildren = await Promise.all(
       logs.map(async (log) => {
-        const lines = await db
+        const areaLines = await db
           .select()
           .from(sprayFoamJobLogLines)
           .where(eq(sprayFoamJobLogLines.jobLogId, log.id))
           .orderBy(sprayFoamJobLogLines.lineNumber);
 
+        const materialLines = await db
+          .select()
+          .from(sprayFoamMaterialLines)
+          .where(eq(sprayFoamMaterialLines.jobLogId, log.id))
+          .orderBy(sprayFoamMaterialLines.lineNumber);
+
         return {
           ...log,
-          lines,
+          lines: areaLines,
+          areaLines,
+          materialLines,
         };
       })
     );
 
-    return res.json({ logs: logsWithLines });
+    return res.json({ logs: logsWithChildren });
   } catch (error) {
     console.error("Admin get all spray foam job logs error:", error);
     return res.status(500).json({ error: "Internal server error." });

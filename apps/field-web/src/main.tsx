@@ -7,6 +7,8 @@ import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import DivisionModulesPage from './pages/DivisionModulesPage'
 import RefrigerantLogPage from './pages/RefrigerantLogPage'
+import QuickEstimateCalculatorPage from './pages/QuickEstimateCalculatorPage'
+import ReimbursementRequestPage from './pages/ReimbursementRequestPage'
 import SprayFoamJobLogPage from './pages/SprayFoamJobLogPage'
 import MyLogsPage from './pages/MyLogsPage'
 import LogDetailPage from './pages/LogDetailPage'
@@ -44,6 +46,22 @@ function App () {
           element={
             <RequireAuth>
               <RefrigerantLogPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path='/quick-estimate-calculator'
+          element={
+            <RequireAuth>
+              <QuickEstimateCalculatorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path='/reimbursement-request'
+          element={
+            <RequireAuth>
+              <ReimbursementRequestPage />
             </RequireAuth>
           }
         />

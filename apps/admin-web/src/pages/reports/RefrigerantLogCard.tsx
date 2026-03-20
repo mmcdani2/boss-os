@@ -16,22 +16,24 @@ export default function RefrigerantLogCard({ log }: { log: RefrigerantLog }) {
   return (
     <Link
       to={`/logs/${log.id}`}
-      className="block rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
+      className="block rounded-3xl border border-white/10 bg-[#1a1a1a] p-4 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-xl font-black tracking-tight text-white">
+          <div className="text-lg font-black tracking-tight text-white">
             {log.customerName || "No customer name"}
           </div>
-          <div className="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-orange-400">
+          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-orange-400">
             {log.refrigerantType}
           </div>
         </div>
 
-        <div className="shrink-0 text-white/35">→</div>
+        <div className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">
+          Refrigerant
+        </div>
       </div>
 
-      <div className="mt-4 grid gap-2 text-sm text-white/65">
+      <div className="mt-4 grid gap-x-6 gap-y-2 text-sm text-white/65 sm:grid-cols-2 xl:grid-cols-4">
         <div>
           <span className="font-semibold text-white/85">Tech:</span> {log.techNameSnapshot}
         </div>
@@ -43,8 +45,9 @@ export default function RefrigerantLogCard({ log }: { log: RefrigerantLog }) {
           {log.state ? `, ${log.state}` : ""}
         </div>
         <div>
-          <span className="font-semibold text-white/85">Added:</span> {log.poundsAdded ?? "0"}{" "}
-          <span className="mx-2 text-white/30">|</span>
+          <span className="font-semibold text-white/85">Added:</span> {log.poundsAdded ?? "0"}
+        </div>
+        <div>
           <span className="font-semibold text-white/85">Recovered:</span>{" "}
           {log.poundsRecovered ?? "0"}
         </div>
