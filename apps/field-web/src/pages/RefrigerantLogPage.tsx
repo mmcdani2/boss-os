@@ -1,66 +1,67 @@
-﻿import { useState } from "react";
-import FieldLayout from "../components/FieldLayout";
-import { API_BASE, getStoredToken } from "../lib/auth";
-import JobInfoSection from "./refrigerant-log/JobInfoSection";
-import RefrigerantInfoSection from "./refrigerant-log/RefrigerantInfoSection";
-import StatusMessage from "./refrigerant-log/StatusMessage";
-import SubmitButton from "./refrigerant-log/SubmitButton";
-import { initialState } from "./refrigerant-log/RefrigerantLogFormFields";
-import type { FormState } from "./refrigerant-log/RefrigerantLogFormFields";
+﻿import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import FieldLayout from '../components/FieldLayout'
+import { API_BASE, getStoredToken } from '../lib/auth'
+import JobInfoSection from './refrigerant-log/JobInfoSection'
+import RefrigerantInfoSection from './refrigerant-log/RefrigerantInfoSection'
+import StatusMessage from './refrigerant-log/StatusMessage'
+import SubmitButton from './refrigerant-log/SubmitButton'
+import { initialState } from './refrigerant-log/RefrigerantLogFormFields'
+import type { FormState } from './refrigerant-log/RefrigerantLogFormFields'
 
-function cleanString(value: string) {
-  const trimmed = value.trim();
-  return trimmed.length ? trimmed : null;
+function cleanString (value: string) {
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
 }
 
-export default function RefrigerantLogPage() {
+export default function RefrigerantLogPage () {
   const [form, setForm] = useState<FormState>({
     ...initialState,
-    companyKey: "urban-mechanical",
-  });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+    companyKey: 'urban-mechanical'
+  })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
-  function update<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  function update<K extends keyof FormState> (key: K, value: FormState[K]) {
+    setForm(prev => ({ ...prev, [key]: value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-    setError("");
+  async function handleSubmit (e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setMessage('')
+    setError('')
 
-    const refrigerantType = form.refrigerantType.trim();
-    const poundsAdded = form.poundsAdded.trim();
-    const poundsRecovered = form.poundsRecovered.trim();
-    const state = form.state.trim().toUpperCase();
+    const refrigerantType = form.refrigerantType.trim()
+    const poundsAdded = form.poundsAdded.trim()
+    const poundsRecovered = form.poundsRecovered.trim()
+    const state = form.state.trim().toUpperCase()
 
     if (!refrigerantType) {
-      setError("Refrigerant type is required.");
-      setLoading(false);
-      return;
+      setError('Refrigerant type is required.')
+      setLoading(false)
+      return
     }
 
     if (!poundsAdded && !poundsRecovered) {
-      setError("Enter pounds added or pounds recovered.");
-      setLoading(false);
-      return;
+      setError('Enter pounds added or pounds recovered.')
+      setLoading(false)
+      return
     }
 
     try {
-      const token = getStoredToken();
+      const token = getStoredToken()
 
       const res = await fetch(`${API_BASE}/api/refrigerant-logs`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          companyKey: "urban-mechanical",
-          divisionKey: "hvac",
+          companyKey: 'urban-mechanical',
+          divisionKey: 'hvac',
           customerName: cleanString(form.customerName),
           jobNumber: cleanString(form.jobNumber),
           city: cleanString(form.city),
@@ -70,42 +71,52 @@ export default function RefrigerantLogPage() {
           poundsAdded: poundsAdded || null,
           poundsRecovered: poundsRecovered || null,
           leakSuspected: form.leakSuspected,
-          notes: cleanString(form.notes),
-        }),
-      });
+          notes: cleanString(form.notes)
+        })
+      })
 
-      const data = await res.json();
+      const data = await res.json()
 
       if (!res.ok) {
-        setError(data?.error || "Failed to submit log.");
-        return;
+        setError(data?.error || 'Failed to submit log.')
+        return
       }
 
-      setMessage("Refrigerant log submitted.");
+      setMessage('Refrigerant log submitted.')
       setForm({
         ...initialState,
-        companyKey: "urban-mechanical",
-      });
+        companyKey: 'urban-mechanical'
+      })
     } catch {
-      setError("Could not reach API.");
+      setError('Could not reach API.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   return (
     <FieldLayout
-      kicker="BossOS Field"
-      title="New Refrigerant Log"
-      subtitle="Enter job details and submit HVAC refrigerant activity from the field."
+      kicker='BossOS Field'
+      title='New Refrigerant Log'
+      subtitle='Enter job details and submit HVAC refrigerant activity from the field.'
     >
-      <form onSubmit={handleSubmit} className="grid gap-5">
-        <JobInfoSection form={form} update={update} />
-        <RefrigerantInfoSection form={form} update={update} />
-        <StatusMessage tone="success" message={message} />
-        <StatusMessage tone="error" message={error} />
-        <SubmitButton loading={loading} />
-      </form>
+      <div className='grid gap-6'>
+        <div>
+          <Link
+            to='/division/hvac'
+            className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
+          >
+            Back to HVAC Modules
+          </Link>
+        </div>
+        <form onSubmit={handleSubmit} className='grid gap-5'>
+          <JobInfoSection form={form} update={update} />
+          <RefrigerantInfoSection form={form} update={update} />
+          <StatusMessage tone='success' message={message} />
+          <StatusMessage tone='error' message={error} />
+          <SubmitButton loading={loading} />
+        </form>
+      </div>
     </FieldLayout>
-  );
+  )
 }
