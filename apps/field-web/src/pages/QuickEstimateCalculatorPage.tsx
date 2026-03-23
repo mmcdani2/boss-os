@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import FieldLayout from "../components/FieldLayout";
+import { getModuleContext } from "../lib/getModuleContext";
 import {
   DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS,
   loadQuickEstimateCalculatorSettings,
@@ -32,6 +33,11 @@ function getDefaultSelectedMargin(settings: QuickEstimateCalculatorSettings) {
 }
 
 export default function QuickEstimateCalculatorPage() {
+  const context = useMemo(
+    () => getModuleContext('quick-estimate-calculator'),
+    []
+  )
+
   const [settings, setSettings] = useState<QuickEstimateCalculatorSettings>(
     DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS
   );
@@ -104,10 +110,10 @@ export default function QuickEstimateCalculatorPage() {
       <div className="grid gap-6">
         <div>
           <Link
-            to="/division/hvac"
+            to={context.returnPath}
             className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
           >
-            Back to HVAC Modules
+            {context.returnLabel}
           </Link>
         </div>
 

@@ -2,6 +2,7 @@
 import { Link, useParams } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
+import { getModuleContext } from '../lib/getModuleContext'
 import JobNotesSection from './reimbursement-log/JobNotesSection'
 import PurchaseSection from './reimbursement-log/PurchaseSection'
 import ReimbursementDetailsSection from './reimbursement-log/ReimbursementDetailsSection'
@@ -13,29 +14,12 @@ import {
   type FormState
 } from '../lib/reimbursement-form'
 
-function getDivisionContext (divisionKey?: string) {
-  switch (divisionKey) {
-    case 'spray-foam':
-      return {
-        divisionKey: 'spray-foam',
-        companyKey: 'urban-spray-foam',
-        returnPath: '/division/spray-foam',
-        returnLabel: 'Back to Spray Foam Modules'
-      }
-    case 'hvac':
-    default:
-      return {
-        divisionKey: 'hvac',
-        companyKey: 'urban-mechanical',
-        returnPath: '/division/hvac',
-        returnLabel: 'Back to HVAC Modules'
-      }
-  }
-}
-
 export default function ReimbursementRequestPage () {
   const { divisionKey } = useParams()
-  const context = useMemo(() => getDivisionContext(divisionKey), [divisionKey])
+  const context = useMemo(
+    () => getModuleContext('reimbursement-request', divisionKey),
+    [divisionKey]
+  )
 
   const [form, setForm] = useState<FormState>(createInitialState())
   const [loading, setLoading] = useState(false)

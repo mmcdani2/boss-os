@@ -2,6 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
+import { getModuleContext } from '../lib/getModuleContext'
 import AreaMaterialLineCard from './spray-foam-job-log/AreaMaterialLineCard'
 import JobHeaderSection from './spray-foam-job-log/JobHeaderSection'
 import StatusMessage from './spray-foam-job-log/StatusMessage'
@@ -23,6 +24,11 @@ import {
 
 export default function SprayFoamJobLogPage () {
   const navigate = useNavigate()
+  const context = useMemo(
+    () => getModuleContext('spray-foam-job-log'),
+    []
+  )
+
   const [form, setForm] = useState<FormState>(createInitialState)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -88,7 +94,7 @@ export default function SprayFoamJobLogPage () {
 
   function handleReturnToModules () {
     setShowSuccessPrompt(false)
-    navigate('/division/spray-foam')
+    navigate(context.returnPath)
   }
 
   async function handleSubmit (e: React.FormEvent) {
@@ -157,8 +163,8 @@ export default function SprayFoamJobLogPage () {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          companyKey: 'urban-spray-foam',
-          divisionKey: 'spray-foam',
+          companyKey: context.companyKey,
+          divisionKey: context.divisionKey,
           jobDate: cleanString(form.jobDate),
           customerName: cleanString(form.customerName),
           jobNumber: cleanString(form.jobNumber),
@@ -203,10 +209,10 @@ export default function SprayFoamJobLogPage () {
       <div className='grid gap-6'>
         <div>
           <Link
-            to='/division/spray-foam'
+            to={context.returnPath}
             className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
           >
-            Back to Spray Foam Modules
+            {context.returnLabel}
           </Link>
         </div>
         <form onSubmit={handleSubmit} className='grid gap-5'>

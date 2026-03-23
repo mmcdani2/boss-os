@@ -1,7 +1,8 @@
-﻿import { useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
+import { getModuleContext } from '../lib/getModuleContext'
 import JobInfoSection from './refrigerant-log/JobInfoSection'
 import RefrigerantInfoSection from './refrigerant-log/RefrigerantInfoSection'
 import StatusMessage from './refrigerant-log/StatusMessage'
@@ -15,9 +16,14 @@ function cleanString (value: string) {
 }
 
 export default function RefrigerantLogPage () {
+  const context = useMemo(
+    () => getModuleContext('refrigerant-log'),
+    []
+  )
+
   const [form, setForm] = useState<FormState>({
     ...initialState,
-    companyKey: 'urban-mechanical'
+    companyKey: context.companyKey
   })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -60,8 +66,8 @@ export default function RefrigerantLogPage () {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          companyKey: 'urban-mechanical',
-          divisionKey: 'hvac',
+          companyKey: context.companyKey,
+          divisionKey: context.divisionKey,
           customerName: cleanString(form.customerName),
           jobNumber: cleanString(form.jobNumber),
           city: cleanString(form.city),
@@ -85,7 +91,7 @@ export default function RefrigerantLogPage () {
       setMessage('Refrigerant log submitted.')
       setForm({
         ...initialState,
-        companyKey: 'urban-mechanical'
+        companyKey: context.companyKey
       })
     } catch {
       setError('Could not reach API.')
@@ -103,10 +109,10 @@ export default function RefrigerantLogPage () {
       <div className='grid gap-6'>
         <div>
           <Link
-            to='/division/hvac'
+            to={context.returnPath}
             className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
           >
-            Back to HVAC Modules
+            {context.returnLabel}
           </Link>
         </div>
         <form onSubmit={handleSubmit} className='grid gap-5'>

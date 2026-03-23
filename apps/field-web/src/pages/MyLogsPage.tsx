@@ -1,7 +1,8 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
+import { getModuleContext } from '../lib/getModuleContext'
 
 type RefrigerantLog = {
   id: string
@@ -94,6 +95,11 @@ function LogCard ({ log }: { log: RefrigerantLog }) {
 }
 
 export default function MyLogsPage () {
+  const context = useMemo(
+    () => getModuleContext('my-refrigerant-logs'),
+    []
+  )
+
   const [logs, setLogs] = useState<RefrigerantLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -130,38 +136,49 @@ export default function MyLogsPage () {
       }
     }
 
-    loadLogs()
+    void loadLogs()
   }, [])
 
   return (
     <FieldLayout
       kicker='Urban Mechanical'
-      title='My Logs'
+      title='My Refrigerant Logs'
       subtitle='Review your recent refrigerant submissions from the field.'
     >
-      {loading ? (
-        <div className='rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl'>
-          Loading logs...
+      <div className='grid gap-6'>
+        <div>
+          <Link
+            to={context.returnPath}
+            className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
+          >
+            {context.returnLabel}
+          </Link>
         </div>
-      ) : null}
 
-      {error ? (
-        <div className='rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200'>
-          {error}
-        </div>
-      ) : null}
+        {loading ? (
+          <div className='rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl'>
+            Loading logs...
+          </div>
+        ) : null}
 
-      {!loading && !error ? (
-        <div className='grid gap-4'>
-          {logs.length === 0 ? (
-            <div className='rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl'>
-              No logs found.
-            </div>
-          ) : (
-            logs.map(log => <LogCard key={log.id} log={log} />)
-          )}
-        </div>
-      ) : null}
+        {error ? (
+          <div className='rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200'>
+            {error}
+          </div>
+        ) : null}
+
+        {!loading && !error ? (
+          <div className='grid gap-4'>
+            {logs.length === 0 ? (
+              <div className='rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl'>
+                No refrigerant logs found.
+              </div>
+            ) : (
+              logs.map(log => <LogCard key={log.id} log={log} />)
+            )}
+          </div>
+        ) : null}
+      </div>
     </FieldLayout>
   )
 }
