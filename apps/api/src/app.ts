@@ -7,6 +7,7 @@ import reimbursementRequestRoutes from "./routes/reimbursement-requests/index.js
 import sprayFoamLogRoutes from "./routes/spray-foam-logs/index.js";
 import companyRoutes from "./routes/company/index.js";
 import divisionRoutes from "./routes/divisions/index.js";
+import fieldConfigRoutes from "./routes/field-config/index.js";
 
 export const app = express();
 
@@ -29,3 +30,4 @@ app.use("/api/reimbursement-requests", reimbursementRequestRoutes);
 app.use("/api/spray-foam-logs", sprayFoamLogRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/divisions", divisionRoutes);
+app.use("/api/field-config", fieldConfigRoutes);
