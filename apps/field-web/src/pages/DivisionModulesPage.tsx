@@ -17,16 +17,18 @@ type LauncherDivision = {
   modules: LauncherModule[];
 };
 
-function moduleRoute(key: string) {
-  switch (key) {
+function moduleRoute(divisionKey: string, moduleKey: string) {
+  switch (moduleKey) {
     case "quick-estimate-calculator":
-      return "/quick-estimate-calculator";
+      return divisionKey === "hvac" ? "/quick-estimate-calculator" : "";
     case "refrigerant-log":
-      return "/refrigerant-log";
+      return divisionKey === "hvac" ? "/refrigerant-log" : "";
     case "reimbursement-request":
-      return "/reimbursement-request";
+      return `/division/${divisionKey}/reimbursement-request`;
     case "spray-foam-job-log":
-      return "/spray-foam-job-log";
+      return divisionKey === "spray-foam"
+        ? "/division/spray-foam/spray-foam-job-log"
+        : "";
     default:
       return "";
   }
@@ -37,7 +39,7 @@ function divisionDescription(key: string) {
     case "hvac":
       return "Live field tools for HVAC technicians.";
     case "spray-foam":
-      return "Spray foam field tools and logs will land here as modules go live.";
+      return "Spray foam field tools and logs.";
     default:
       return "Division tools and field workflows.";
   }
@@ -187,7 +189,7 @@ export default function DivisionModulesPage() {
                   </div>
                 ) : (
                   division.modules.map((module) => {
-                    const route = moduleRoute(module.key);
+                    const route = moduleRoute(division.key, module.key);
 
                     return (
                       <ModuleCard

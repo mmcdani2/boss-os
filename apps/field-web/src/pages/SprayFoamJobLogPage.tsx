@@ -1,6 +1,5 @@
 ﻿import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
 import AreaMaterialLineCard from './spray-foam-job-log/AreaMaterialLineCard'
@@ -204,10 +203,10 @@ export default function SprayFoamJobLogPage () {
       <div className='grid gap-6'>
         <div>
           <Link
-            to='/division/hvac'
+            to='/division/spray-foam'
             className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
           >
-            Back to HVAC Modules
+            Back to Spray Foam Modules
           </Link>
         </div>
         <form onSubmit={handleSubmit} className='grid gap-5'>

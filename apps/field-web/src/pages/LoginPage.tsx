@@ -53,9 +53,9 @@ export default function LoginPage () {
 
   return (
     <FieldLayout
-      kicker='Urban Field'
+      kicker='BossOS Field'
       title='Tech Login'
-      subtitle='Sign in to submit refrigerant activity and review your recent field logs.'
+      subtitle='Sign in to access field tools and resources.'
     >
       <div className='mx-auto max-w-xl'>
         <form

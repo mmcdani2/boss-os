@@ -20,7 +20,7 @@ function navClass (isActive: boolean) {
 
 export default function FieldLayout ({
   children,
-  kicker = 'Urban Field',
+  kicker = 'BossOS',
   title,
   subtitle
 }: FieldLayoutProps) {
@@ -40,9 +40,6 @@ export default function FieldLayout ({
                 <p className='text-[12px] font-bold uppercase tracking-[0.28em] text-orange-400'>
                   {kicker}
                 </p>
-                <div className='mt-2 text-lg font-black tracking-tight text-white sm:text-xl'>
-                  Field App
-                </div>
               </div>
 
               {token ? (

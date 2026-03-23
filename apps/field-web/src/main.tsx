@@ -25,6 +25,7 @@ function App () {
       <Routes>
         <Route path='/' element={<Navigate to='/login' replace />} />
         <Route path='/login' element={<LoginPage />} />
+
         <Route
           path='/home'
           element={
@@ -33,6 +34,7 @@ function App () {
             </RequireAuth>
           }
         />
+
         <Route
           path='/division/:divisionKey'
           element={
@@ -41,6 +43,7 @@ function App () {
             </RequireAuth>
           }
         />
+
         <Route
           path='/refrigerant-log'
           element={
@@ -49,6 +52,7 @@ function App () {
             </RequireAuth>
           }
         />
+
         <Route
           path='/quick-estimate-calculator'
           element={
@@ -57,22 +61,25 @@ function App () {
             </RequireAuth>
           }
         />
+
         <Route
-          path='/reimbursement-request'
+          path='/division/:divisionKey/reimbursement-request'
           element={
             <RequireAuth>
               <ReimbursementRequestPage />
             </RequireAuth>
           }
         />
+
         <Route
-          path='/spray-foam-job-log'
+          path='/division/spray-foam/spray-foam-job-log'
           element={
             <RequireAuth>
               <SprayFoamJobLogPage />
             </RequireAuth>
           }
         />
+
         <Route
           path='/my-logs'
           element={
@@ -81,6 +88,7 @@ function App () {
             </RequireAuth>
           }
         />
+
         <Route
           path='/logs/:id'
           element={

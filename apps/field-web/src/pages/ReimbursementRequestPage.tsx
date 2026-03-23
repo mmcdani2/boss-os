@@ -1,5 +1,5 @@
-﻿import { useState } from 'react'
-import { Link } from 'react-router-dom'
+﻿import { useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import FieldLayout from '../components/FieldLayout'
 import { API_BASE, getStoredToken } from '../lib/auth'
 import JobNotesSection from './reimbursement-log/JobNotesSection'
@@ -13,7 +13,30 @@ import {
   type FormState
 } from '../lib/reimbursement-form'
 
+function getDivisionContext (divisionKey?: string) {
+  switch (divisionKey) {
+    case 'spray-foam':
+      return {
+        divisionKey: 'spray-foam',
+        companyKey: 'urban-spray-foam',
+        returnPath: '/division/spray-foam',
+        returnLabel: 'Back to Spray Foam Modules'
+      }
+    case 'hvac':
+    default:
+      return {
+        divisionKey: 'hvac',
+        companyKey: 'urban-mechanical',
+        returnPath: '/division/hvac',
+        returnLabel: 'Back to HVAC Modules'
+      }
+  }
+}
+
 export default function ReimbursementRequestPage () {
+  const { divisionKey } = useParams()
+  const context = useMemo(() => getDivisionContext(divisionKey), [divisionKey])
+
   const [form, setForm] = useState<FormState>(createInitialState())
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -81,8 +104,8 @@ export default function ReimbursementRequestPage () {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          companyKey: 'urban-mechanical',
-          divisionKey: 'hvac',
+          companyKey: context.companyKey,
+          divisionKey: context.divisionKey,
           amountSpent,
           purchaseDate: form.purchaseDate,
           vendor,
@@ -122,10 +145,10 @@ export default function ReimbursementRequestPage () {
       <div className='grid gap-6'>
         <div>
           <Link
-            to='/division/hvac'
+            to={context.returnPath}
             className='inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white'
           >
-            Back to HVAC Modules
+            {context.returnLabel}
           </Link>
         </div>
         <form onSubmit={handleSubmit} className='grid gap-5'>
