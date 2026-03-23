@@ -6,27 +6,15 @@ import ReimbursementRequestsPanel from "./reports/ReimbursementRequestsPanel";
 import ReportsDivisionSelect from "./reports/ReportsDivisionSelect";
 import ReportsModulePanel from "./reports/ReportsModulePanel";
 import SprayFoamRecordsPanel from "./reports/SprayFoamRecordsPanel";
-import type { RefrigerantLog } from "./reports/RefrigerantLogCard";
-import type {
-  Division,
-  DivisionModuleRow,
-  ReimbursementRequest,
-  SprayFoamLog,
-} from "./reports/types";
+import type { Division, DivisionModuleRow } from "./reports/types";
 
 export default function LogsPage() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [selectedDivisionId, setSelectedDivisionId] = useState("");
   const [selectedModuleKey, setSelectedModuleKey] = useState("");
   const [modules, setModules] = useState<DivisionModuleRow[]>([]);
-  const [refrigerantLogs, setRefrigerantLogs] = useState<RefrigerantLog[]>([]);
-  const [sprayFoamLogs, setSprayFoamLogs] = useState<SprayFoamLog[]>([]);
-  const [reimbursementRequests, setReimbursementRequests] = useState<ReimbursementRequest[]>([]);
   const [loadingDivisions, setLoadingDivisions] = useState(true);
   const [loadingModules, setLoadingModules] = useState(true);
-  const [loadingRefrigerantLogs, setLoadingRefrigerantLogs] = useState(false);
-  const [loadingSprayFoamLogs, setLoadingSprayFoamLogs] = useState(false);
-  const [loadingReimbursementRequests, setLoadingReimbursementRequests] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -114,126 +102,6 @@ export default function LogsPage() {
     void loadDivisionModules();
   }, [selectedDivisionId]);
 
-  useEffect(() => {
-    async function loadRefrigerantLogs() {
-      if (!selectedDivision?.key || selectedModuleKey !== "refrigerant-log") {
-        setRefrigerantLogs([]);
-        setLoadingRefrigerantLogs(false);
-        return;
-      }
-
-      try {
-        setLoadingRefrigerantLogs(true);
-        setError("");
-
-        const token = getStoredToken();
-        const url = new URL(`${API_BASE}/api/refrigerant-logs/admin/all`);
-        url.searchParams.set("divisionKey", selectedDivision.key);
-
-        const res = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data?.error || "Failed to load refrigerant logs.");
-          return;
-        }
-
-        setRefrigerantLogs(Array.isArray(data.logs) ? data.logs : []);
-      } catch {
-        setError("Could not reach API.");
-      } finally {
-        setLoadingRefrigerantLogs(false);
-      }
-    }
-
-    void loadRefrigerantLogs();
-  }, [selectedDivision?.key, selectedModuleKey]);
-
-  useEffect(() => {
-    async function loadSprayFoamLogs() {
-      if (!selectedDivision?.key || selectedModuleKey !== "spray-foam-job-log") {
-        setSprayFoamLogs([]);
-        setLoadingSprayFoamLogs(false);
-        return;
-      }
-
-      try {
-        setLoadingSprayFoamLogs(true);
-        setError("");
-
-        const token = getStoredToken();
-        const url = new URL(`${API_BASE}/api/spray-foam-logs/admin/all`);
-        url.searchParams.set("divisionKey", selectedDivision.key);
-
-        const res = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data?.error || "Failed to load spray foam logs.");
-          return;
-        }
-
-        setSprayFoamLogs(Array.isArray(data.logs) ? data.logs : []);
-      } catch {
-        setError("Could not reach API.");
-      } finally {
-        setLoadingSprayFoamLogs(false);
-      }
-    }
-
-    void loadSprayFoamLogs();
-  }, [selectedDivision?.key, selectedModuleKey]);
-
-  useEffect(() => {
-    async function loadReimbursementRequests() {
-      if (!selectedDivision?.key || selectedModuleKey !== "reimbursement-request") {
-        setReimbursementRequests([]);
-        setLoadingReimbursementRequests(false);
-        return;
-      }
-
-      try {
-        setLoadingReimbursementRequests(true);
-        setError("");
-
-        const token = getStoredToken();
-        const url = new URL(`${API_BASE}/api/reimbursement-requests`);
-        url.searchParams.set("divisionKey", selectedDivision.key);
-
-        const res = await fetch(url.toString(), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data?.error || "Failed to load reimbursement requests.");
-          return;
-        }
-
-        setReimbursementRequests(Array.isArray(data.requests) ? data.requests : []);
-      } catch {
-        setError("Could not reach API.");
-      } finally {
-        setLoadingReimbursementRequests(false);
-      }
-    }
-
-    void loadReimbursementRequests();
-  }, [selectedDivision?.key, selectedModuleKey]);
-
   const enabledModules = useMemo(
     () => modules.filter((row) => row.isEnabled && row.module.isActive),
     [modules]
@@ -297,26 +165,23 @@ export default function LogsPage() {
               />
             ) : null}
 
-            {showingRefrigerantRecords ? (
+            {showingRefrigerantRecords && selectedDivision?.key ? (
               <RefrigerantRecordsPanel
-                logs={refrigerantLogs}
-                loading={loadingRefrigerantLogs}
+                divisionKey={selectedDivision.key}
                 onBack={() => setSelectedModuleKey("")}
               />
             ) : null}
 
-            {showingSprayFoamRecords ? (
+            {showingSprayFoamRecords && selectedDivision?.key ? (
               <SprayFoamRecordsPanel
-                logs={sprayFoamLogs}
-                loading={loadingSprayFoamLogs}
+                divisionKey={selectedDivision.key}
                 onBack={() => setSelectedModuleKey("")}
               />
             ) : null}
 
-            {showingReimbursementRequests ? (
+            {showingReimbursementRequests && selectedDivision?.key ? (
               <ReimbursementRequestsPanel
-                requests={reimbursementRequests}
-                loading={loadingReimbursementRequests}
+                divisionKey={selectedDivision.key}
                 onBack={() => setSelectedModuleKey("")}
               />
             ) : null}

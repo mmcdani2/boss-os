@@ -141,7 +141,7 @@ export default function MyLogsPage () {
 
   return (
     <FieldLayout
-      kicker='Urban Mechanical'
+      kicker='BossOS Field'
       title='My Refrigerant Logs'
       subtitle='Review your recent refrigerant submissions from the field.'
     >

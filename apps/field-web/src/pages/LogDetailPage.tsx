@@ -82,9 +82,9 @@ export default function LogDetailPage () {
 
   return (
     <FieldLayout
-      kicker='Urban Mechanical'
+      kicker='BossOS Field'
       title='Log Detail'
-      subtitle='Review submission details from the field.'
+      subtitle='Review refrigerant submission details from the field.'
     >
       <div className='mb-4'>
         <Link

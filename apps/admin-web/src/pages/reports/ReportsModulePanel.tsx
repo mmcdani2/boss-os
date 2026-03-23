@@ -1,10 +1,7 @@
-﻿type ModuleItem = {
-  key: string;
-  name: string;
-};
+﻿import type { ReportModuleItem } from "./types";
 
 type Props = {
-  modules: ModuleItem[];
+  modules: ReportModuleItem[];
   selectedModuleKey: string;
   onSelectModule: (moduleKey: string) => void;
 };

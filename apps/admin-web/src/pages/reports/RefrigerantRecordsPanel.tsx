@@ -1,12 +1,51 @@
-﻿import RefrigerantLogCard, { type RefrigerantLog } from "./RefrigerantLogCard";
+﻿import { useEffect, useState } from "react";
+import { API_BASE, getStoredToken } from "../../lib/auth";
+import RefrigerantLogCard, { type RefrigerantLog } from "./RefrigerantLogCard";
 
 type Props = {
-  logs: RefrigerantLog[];
-  loading: boolean;
+  divisionKey: string;
   onBack: () => void;
 };
 
-export default function RefrigerantRecordsPanel({ logs, loading, onBack }: Props) {
+export default function RefrigerantRecordsPanel({ divisionKey, onBack }: Props) {
+  const [logs, setLogs] = useState<RefrigerantLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadLogs() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = getStoredToken();
+        const url = new URL(`${API_BASE}/api/refrigerant-logs/admin/all`);
+        url.searchParams.set("divisionKey", divisionKey);
+
+        const res = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data?.error || "Failed to load refrigerant logs.");
+          return;
+        }
+
+        setLogs(Array.isArray(data.logs) ? data.logs : []);
+      } catch {
+        setError("Could not reach API.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadLogs();
+  }, [divisionKey]);
+
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between gap-4 rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-2xl">
@@ -27,6 +66,12 @@ export default function RefrigerantRecordsPanel({ logs, loading, onBack }: Props
           Back to Modules
         </button>
       </div>
+
+      {error ? (
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
+          {error}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">

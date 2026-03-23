@@ -1,17 +1,55 @@
-﻿import type { ReimbursementRequest } from "./types";
+﻿import { useEffect, useState } from "react";
+import { API_BASE, getStoredToken } from "../../lib/auth";
+import type { ReimbursementRequest } from "./types";
 import ReimbursementRequestCard from "./ReimbursementRequestCard";
 
 type Props = {
-  requests: ReimbursementRequest[];
-  loading: boolean;
+  divisionKey: string;
   onBack: () => void;
 };
 
 export default function ReimbursementRequestsPanel({
-  requests,
-  loading,
+  divisionKey,
   onBack,
 }: Props) {
+  const [requests, setRequests] = useState<ReimbursementRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadRequests() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = getStoredToken();
+        const url = new URL(`${API_BASE}/api/reimbursement-requests`);
+        url.searchParams.set("divisionKey", divisionKey);
+
+        const res = await fetch(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data?.error || "Failed to load reimbursement requests.");
+          return;
+        }
+
+        setRequests(Array.isArray(data.requests) ? data.requests : []);
+      } catch {
+        setError("Could not reach API.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadRequests();
+  }, [divisionKey]);
+
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between gap-4 rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-2xl">
@@ -32,6 +70,12 @@ export default function ReimbursementRequestsPanel({
           Back to Modules
         </button>
       </div>
+
+      {error ? (
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm font-medium text-red-200">
+          {error}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">

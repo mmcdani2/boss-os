@@ -1,12 +1,4 @@
-﻿type Division = {
-  id: string;
-  companyId: string;
-  key: string;
-  name: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+﻿import type { Division } from "./types";
 
 type Props = {
   divisions: Division[];

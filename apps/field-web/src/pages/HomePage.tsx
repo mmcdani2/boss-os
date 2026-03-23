@@ -91,7 +91,7 @@ export default function HomePage() {
       }
     }
 
-    loadLauncher();
+    void loadLauncher();
   }, []);
 
   return (
