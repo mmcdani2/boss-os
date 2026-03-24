@@ -84,20 +84,13 @@ export default function DivisionsPage() {
   return (
     <Layout
       title="Divisions"
-      subtitle="Manage the business units that BossOS organizes for reporting, modules, and future permissions."
     >
       <div className="grid gap-6">
-        <div className="rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-2xl">
-          <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
-            Structure
-          </div>
+
           <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
-            Active business divisions
+            Active divisions
           </h2>
-          <p className="mt-2 text-sm text-white/65 sm:text-base">
-            Divisions separate operating units like HVAC and Spray Foam. Module enablement and user assignment will hang off this next.
-          </p>
-        </div>
+
 
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
