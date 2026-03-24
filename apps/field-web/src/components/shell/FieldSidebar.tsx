@@ -1,19 +1,19 @@
 ﻿import { NavLink } from "react-router-dom";
-import type { AdminNavItem } from "../../types/nav";
+import type { FieldNavItem } from "../../types/nav";
 
-type AdminSidebarProps = {
-  items: AdminNavItem[];
+type FieldSidebarProps = {
+  items: FieldNavItem[];
   pathname: string;
   onNavigate?: () => void;
   onLogout: () => void;
 };
 
-export default function AdminSidebar({
+export default function FieldSidebar({
   items,
   pathname,
   onNavigate,
   onLogout,
-}: AdminSidebarProps) {
+}: FieldSidebarProps) {
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#0f0f0f] text-white">
       <div className="shrink-0 border-b border-white/10 px-5 py-5">
@@ -21,10 +21,10 @@ export default function AdminSidebar({
           BossOS
         </div>
         <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
-          Admin
+          Field
         </div>
         <p className="mt-2 text-sm text-white/60">
-          Operations, logs, divisions, and settings.
+          Daily field tools, logs, and division workflows.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export default function AdminSidebar({
             Current shell
           </div>
           <p className="mt-2 text-sm text-white/65">
-            Compatibility wrapper around the current admin workflows.
+            Compatibility wrapper around the current field workflows.
           </p>
 
           <button

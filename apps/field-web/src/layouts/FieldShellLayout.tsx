@@ -1,28 +1,26 @@
 ﻿import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import AdminSidebar from "../components/shell/AdminSidebar";
-import AdminTopbar from "../components/shell/AdminTopbar";
-import { useCompany } from "../context/CompanyContext";
+import FieldSidebar from "../components/shell/FieldSidebar";
+import FieldTopbar from "../components/shell/FieldTopbar";
 import { clearStoredToken } from "../lib/auth";
-import { adminNavItems } from "../lib/nav";
+import { fieldNavItems } from "../lib/nav";
 
-type AdminShellLayoutProps = {
+type FieldShellLayoutProps = {
   children: ReactNode;
   kicker?: string;
   title?: string;
   subtitle?: string;
 };
 
-export default function AdminShellLayout({
+export default function FieldShellLayout({
   children,
   kicker,
   title,
   subtitle,
-}: AdminShellLayoutProps) {
+}: FieldShellLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { company } = useCompany();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
@@ -52,25 +50,28 @@ export default function AdminShellLayout({
     navigate("/login", { replace: true });
   };
 
+  if (location.pathname === "/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-[1600px] px-3 py-3 sm:px-5 sm:py-5">
         <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
           <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="hidden h-[calc(100vh-24px)] min-h-0 border-r border-white/10 lg:block sm:h-[calc(100vh-40px)]">
-              <AdminSidebar
-                items={adminNavItems}
+              <FieldSidebar
+                items={fieldNavItems}
                 pathname={location.pathname}
                 onLogout={handleLogout}
               />
             </aside>
 
             <div className="min-w-0">
-              <AdminTopbar
+              <FieldTopbar
                 kicker={kicker}
                 title={title}
                 subtitle={subtitle}
-                companyName={company?.name}
                 onOpenMobileNav={() => setMobileNavOpen(true)}
               />
 
@@ -114,8 +115,8 @@ export default function AdminShellLayout({
             </div>
 
             <div className="min-h-0 flex-1">
-              <AdminSidebar
-                items={adminNavItems}
+              <FieldSidebar
+                items={fieldNavItems}
                 pathname={location.pathname}
                 onNavigate={() => setMobileNavOpen(false)}
                 onLogout={handleLogout}
