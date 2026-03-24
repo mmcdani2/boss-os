@@ -58,7 +58,11 @@ export default function AdminShellLayout({
         <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
           <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="hidden border-r border-white/10 lg:block">
-              <AdminSidebar items={adminNavItems} pathname={location.pathname} />
+              <AdminSidebar
+                items={adminNavItems}
+                pathname={location.pathname}
+                onLogout={handleLogout}
+              />
             </aside>
 
             <div className="min-w-0">
@@ -67,7 +71,6 @@ export default function AdminShellLayout({
                 title={title}
                 subtitle={subtitle}
                 companyName={company?.name}
-                onLogout={handleLogout}
                 onOpenMobileNav={() => setMobileNavOpen(true)}
               />
 
@@ -114,6 +117,7 @@ export default function AdminShellLayout({
               items={adminNavItems}
               pathname={location.pathname}
               onNavigate={() => setMobileNavOpen(false)}
+              onLogout={handleLogout}
             />
           </div>
         </div>

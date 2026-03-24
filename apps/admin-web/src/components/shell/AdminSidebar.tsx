@@ -5,12 +5,14 @@ type AdminSidebarProps = {
   items: AdminNavItem[];
   pathname: string;
   onNavigate?: () => void;
+  onLogout: () => void;
 };
 
 export default function AdminSidebar({
   items,
   pathname,
   onNavigate,
+  onLogout,
 }: AdminSidebarProps) {
   return (
     <div className="flex h-full flex-col bg-[#0f0f0f] text-white">
@@ -21,7 +23,9 @@ export default function AdminSidebar({
         <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
           Admin
         </div>
-
+        <p className="mt-2 text-sm text-white/60">
+          Operations, logs, divisions, and settings.
+        </p>
       </div>
 
       <nav className="flex-1 space-y-2 px-3 py-4">
@@ -60,11 +64,19 @@ export default function AdminSidebar({
       <div className="border-t border-white/10 px-4 py-4">
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            App Version
+            Current shell
           </div>
           <p className="mt-2 text-sm text-white/65">
-            1.0
+            Compatibility wrapper around the current admin workflows.
           </p>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            Log out
+          </button>
         </div>
       </div>
     </div>

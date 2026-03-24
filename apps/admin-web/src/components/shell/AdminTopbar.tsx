@@ -3,7 +3,6 @@
   title?: string;
   subtitle?: string;
   companyName?: string;
-  onLogout: () => void;
   onOpenMobileNav: () => void;
 };
 
@@ -12,12 +11,11 @@ export default function AdminTopbar({
   title,
   subtitle,
   companyName,
-  onLogout,
   onOpenMobileNav,
 }: AdminTopbarProps) {
   return (
     <header className="border-b border-white/10 bg-[#141414]/95 px-5 py-5 backdrop-blur sm:px-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4">
         <div className="min-w-0">
           <div className="mb-3 flex items-center gap-3 lg:hidden">
             <button
@@ -49,16 +47,6 @@ export default function AdminTopbar({
               {subtitle}
             </p>
           ) : null}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10"
-          >
-            Log out
-          </button>
         </div>
       </div>
     </header>
