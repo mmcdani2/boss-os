@@ -4,7 +4,7 @@ import { API_BASE, getStoredToken, setStoredToken, type LoginResponse } from "..
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("alex@laurelstreetcreative.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

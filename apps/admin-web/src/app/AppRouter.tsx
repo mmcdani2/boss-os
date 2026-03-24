@@ -9,6 +9,7 @@ import ReimbursementRequestDetailPage from "../pages/ReimbursementRequestDetailP
 import DivisionsPage from "../pages/DivisionsPage";
 import DivisionDetailPage from "../pages/DivisionDetailPage";
 import SettingsPage from "../pages/SettingsPage";
+import UsersPage from "../pages/UsersPage";
 
 export default function AppRouter() {
   return (
@@ -63,6 +64,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute>
                 <DivisionDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <UsersPage />
               </ProtectedRoute>
             }
           />

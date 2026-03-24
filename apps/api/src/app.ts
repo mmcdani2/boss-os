@@ -8,6 +8,7 @@ import sprayFoamLogRoutes from "./routes/spray-foam-logs/index.js";
 import companyRoutes from "./routes/company/index.js";
 import divisionRoutes from "./routes/divisions/index.js";
 import fieldConfigRoutes from "./routes/field-config/index.js";
+import userRoutes from "./routes/users/index.js";
 
 export const app = express();
 
@@ -31,3 +32,5 @@ app.use("/api/spray-foam-logs", sprayFoamLogRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/divisions", divisionRoutes);
 app.use("/api/field-config", fieldConfigRoutes);
+app.use("/api/users", userRoutes);
+

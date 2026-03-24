@@ -42,7 +42,10 @@ router.post("/login", async (req, res) => {
     const email = String(req.body?.email || "").trim().toLowerCase();
     const password = String(req.body?.password || "");
 
+    console.log("[AUTH LOGIN] attempt", { email, passwordLength: password.length });
+
     if (!email || !password) {
+      console.log("[AUTH LOGIN] missing credentials", { emailPresent: !!email, passwordPresent: !!password });
       return res.status(400).json({ error: "Email and password are required." });
     }
 
@@ -54,11 +57,30 @@ router.post("/login", async (req, res) => {
 
     const user = rows[0];
 
+    console.log("[AUTH LOGIN] user lookup", {
+      email,
+      found: !!user,
+      userId: user?.id ?? null,
+      role: user?.role ?? null,
+      isActive: user?.isActive ?? null,
+    });
+
     if (!user || !user.isActive) {
+      console.log("[AUTH LOGIN] rejecting before bcrypt", {
+        reason: !user ? "user_not_found" : "inactive_user",
+        email,
+      });
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash);
+
+    console.log("[AUTH LOGIN] bcrypt compare result", {
+      email,
+      userId: user.id,
+      valid,
+      hashPrefix: user.passwordHash.slice(0, 10),
+    });
 
     if (!valid) {
       return res.status(401).json({ error: "Invalid credentials." });
@@ -73,6 +95,12 @@ router.post("/login", async (req, res) => {
       getJwtSecret(),
       { expiresIn: "7d" }
     );
+
+    console.log("[AUTH LOGIN] success", {
+      email,
+      userId: user.id,
+      role: user.role,
+    });
 
     return res.json({
       token,
