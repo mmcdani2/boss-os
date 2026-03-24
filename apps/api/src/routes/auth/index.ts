@@ -14,6 +14,29 @@ const MODULES_BY_DIVISION: Record<string, string[]> = {
   "spray-foam": ["reimbursement-request", "spray-foam-job-log"],
 };
 
+function getCapabilitiesForRole(role: string): string[] {
+  if (role === "admin") {
+    return [
+      "app:admin",
+      "app:field",
+      "logs:read:all",
+      "logs:read:detail",
+      "reimbursements:read:all",
+      "reimbursements:read:detail",
+      "divisions:read",
+      "settings:read",
+    ];
+  }
+
+  return [
+    "app:field",
+    "logs:create",
+    "logs:read:self",
+    "reimbursements:create",
+    "reimbursements:read:self",
+  ];
+}
+
 router.post("/login", async (req, res) => {
   try {
     const email = String(req.body?.email || "").trim().toLowerCase();
@@ -92,7 +115,20 @@ router.get("/me", requireAuth, async (req: AuthedRequest, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    return res.json({ user });
+    const capabilities = getCapabilitiesForRole(user.role);
+
+    return res.json({
+      user,
+      session: {
+        authenticated: true,
+        role: user.role,
+      },
+      permissions: {
+        role: user.role,
+        isAdmin: user.role === "admin",
+        capabilities,
+      },
+    });
   } catch (error) {
     console.error("Get me error:", error);
     return res.status(500).json({ error: "Internal server error." });

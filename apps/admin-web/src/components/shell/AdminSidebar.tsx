@@ -62,7 +62,7 @@ export default function AdminSidebar({
       </nav>
 
       <div className="shrink-0 border-t border-white/10 px-4 py-4">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+        <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
             Current shell
           </div>
