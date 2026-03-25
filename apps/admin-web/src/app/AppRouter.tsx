@@ -1,6 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
-import ProtectedRoute from "./routes/ProtectedRoute";
 import PermissionRoute from "./routes/PermissionRoute";
 import LoginPage from "../features/auth/pages/LoginPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
@@ -23,49 +22,49 @@ export default function AppRouter() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <DashboardPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/logs"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <LogsPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/logs/:id"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <LogDetailPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/reimbursement-requests/:id"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <ReimbursementRequestDetailPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/divisions"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <DivisionsPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/divisions/:id"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <DivisionDetailPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
@@ -89,6 +88,3 @@ export default function AppRouter() {
     </BrowserRouter>
   );
 }
-
-
-

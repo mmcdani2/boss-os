@@ -242,7 +242,7 @@ export default function QuickEstimateCalculatorPage() {
             </button>
 
             <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-semibold text-white/55">
-              Margin: {formatMarginLabel(selectedMargin)} â€¢ Labor Rate: {formatCurrency(settings.laborRate)}/hr
+              Margin: {formatMarginLabel(selectedMargin)} & Labor Rate: {formatCurrency(settings.laborRate)}/hr
             </div>
           </div>
         </div>

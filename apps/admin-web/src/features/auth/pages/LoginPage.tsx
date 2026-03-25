@@ -1,14 +1,42 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiJson } from "../../../shared/api/client";
+import { useAuth } from "../../../app/providers/AuthProvider";
 import {
+  clearStoredToken,
   getStoredToken,
   setStoredToken,
   type LoginResponse,
 } from "../../../shared/api/auth-storage";
 
+type AuthUser = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  isActive?: boolean;
+};
+
+type AuthSession = {
+  authenticated: boolean;
+  role: string;
+};
+
+type AuthPermissions = {
+  role: string;
+  isAdmin: boolean;
+  capabilities: string[];
+};
+
+type AuthMeResponse = {
+  user: AuthUser | null;
+  session: AuthSession | null;
+  permissions: AuthPermissions | null;
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { refreshAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,8 +44,27 @@ export default function LoginPage() {
   const token = getStoredToken();
 
   useEffect(() => {
-    if (token) navigate("/dashboard");
-  }, [token, navigate]);
+    async function validateExistingSession() {
+      if (!token) return;
+
+      try {
+        const auth = await apiJson<AuthMeResponse>("/api/auth/me");
+
+        if (auth.permissions?.isAdmin) {
+          await refreshAuth();
+          navigate("/dashboard");
+          return;
+        }
+
+        clearStoredToken();
+        setError("This account does not have access to the admin app.");
+      } catch {
+        clearStoredToken();
+      }
+    }
+
+    void validateExistingSession();
+  }, [token, navigate, refreshAuth]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,6 +79,16 @@ export default function LoginPage() {
       });
 
       setStoredToken(loginData.token);
+
+      const auth = await apiJson<AuthMeResponse>("/api/auth/me");
+
+      if (!auth.permissions?.isAdmin) {
+        clearStoredToken();
+        setError("This account does not have access to the admin app.");
+        return;
+      }
+
+      await refreshAuth();
       navigate("/dashboard");
     } catch (err) {
       const message =

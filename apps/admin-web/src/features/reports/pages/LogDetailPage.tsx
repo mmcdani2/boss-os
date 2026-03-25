@@ -370,7 +370,7 @@ export default function LogDetailPage() {
                   {line.areaDescription}
                 </h3>
                 <div className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/55">
-                  {line.jobType} Ã‚Â· {line.foamType}
+                  {line.jobType} Ãƒâ€šÃ‚Â· {line.foamType}
                 </div>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
