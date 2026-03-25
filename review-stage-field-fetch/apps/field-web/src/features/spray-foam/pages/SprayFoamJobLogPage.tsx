@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import FieldShellLayout from '../../../shell/FieldShellLayout'
-import { apiFetch } from '../../../shared/api/client'
+import { API_BASE, getStoredToken } from '../../../shared/api/auth-storage'
 import { getModuleContext } from '../../../features/launcher/lib/getModuleContext'
 import AreaMaterialLineCard from '../components/AreaMaterialLineCard'
 import JobHeaderSection from '../components/JobHeaderSection'
@@ -154,8 +154,14 @@ export default function SprayFoamJobLogPage () {
     }
 
     try {
-      const res = await apiFetch('/api/spray-foam-logs', {
+      const token = getStoredToken()
+
+      const res = await fetch(`${API_BASE}/api/spray-foam-logs`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
           companyKey: context.companyKey,
           divisionKey: context.divisionKey,
@@ -178,7 +184,7 @@ export default function SprayFoamJobLogPage () {
         })
       })
 
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json()
 
       if (!res.ok) {
         setError(data?.error || 'Failed to submit spray foam job log.')
@@ -248,3 +254,7 @@ export default function SprayFoamJobLogPage () {
     </FieldShellLayout>
   )
 }
+
+
+
+

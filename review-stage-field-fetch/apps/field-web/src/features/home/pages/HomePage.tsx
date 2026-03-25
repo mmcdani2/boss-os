@@ -1,63 +1,76 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AdminShellLayout from "../../../shell/AdminShellLayout";
+import FieldShellLayout from "../../../shell/FieldShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
-type Division = {
+type LauncherModule = {
   id: string;
-  companyId: string;
   key: string;
   name: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  category: string;
 };
 
-function DivisionCard({ division }: { division: Division }) {
+type LauncherDivision = {
+  id: string;
+  key: string;
+  name: string;
+  modules: LauncherModule[];
+};
+
+function divisionDescription(key: string) {
+  switch (key) {
+    case "hvac":
+      return "HVAC tools, logs, and field workflows.";
+    case "spray-foam":
+      return "Spray foam tools, logs, and future field workflows.";
+    default:
+      return "Division tools and field workflows.";
+  }
+}
+
+function DivisionCard({
+  to,
+  eyebrow,
+  title,
+  description,
+}: {
+  to: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
   return (
     <Link
-      to={`/divisions/${division.id}`}
+      to={to}
       className="block rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl transition hover:border-white/20 hover:bg-white/[0.07]"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="text-xl font-black tracking-tight text-white">
-            {division.name}
-          </div>
-          <div className="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-orange-400">
-            {division.key}
-          </div>
-        </div>
-
-        <div
-          className={[
-            "rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em]",
-            division.isActive
-              ? "bg-emerald-500/15 text-emerald-300"
-              : "bg-white/10 text-white/55",
-          ].join(" ")}
-        >
-          {division.isActive ? "Active" : "Inactive"}
-        </div>
+      <div className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange-400">
+        {eyebrow}
       </div>
+      <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
+        {title}
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-white/65 sm:text-base">
+        {description}
+      </p>
     </Link>
   );
 }
 
-export default function DivisionsPage() {
-  const [divisions, setDivisions] = useState<Division[]>([]);
+export default function HomePage() {
+  const [divisions, setDivisions] = useState<LauncherDivision[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadDivisions() {
+    async function loadLauncher() {
       try {
         setLoading(true);
         setError("");
 
         const token = getStoredToken();
 
-        const res = await fetch(`${API_BASE}/api/divisions`, {
+        const res = await fetch(`${API_BASE}/api/auth/launcher`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -78,20 +91,16 @@ export default function DivisionsPage() {
       }
     }
 
-    loadDivisions();
+    void loadLauncher();
   }, []);
 
   return (
-    <AdminShellLayout
+    <FieldShellLayout
+      kicker="BossOS Field"
       title="Divisions"
+      subtitle="Choose a division first, then open the tools inside it."
     >
       <div className="grid gap-6">
-
-          <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
-            Active divisions
-          </h2>
-
-
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
             Loading divisions...
@@ -105,20 +114,26 @@ export default function DivisionsPage() {
         ) : null}
 
         {!loading && !error ? (
-          <div className="grid gap-4">
+          <>
             {divisions.length === 0 ? (
               <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/65 shadow-2xl">
-                No divisions found.
+                No active divisions are available yet.
               </div>
             ) : (
               divisions.map((division) => (
-                <DivisionCard key={division.id} division={division} />
+                <DivisionCard
+                  key={division.id}
+                  to={`/division/${division.key}`}
+                  eyebrow="Division"
+                  title={division.name}
+                  description={divisionDescription(division.key)}
+                />
               ))
             )}
-          </div>
+          </>
         ) : null}
       </div>
-    </AdminShellLayout>
+    </FieldShellLayout>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import FieldShellLayout from '../../../shell/FieldShellLayout'
-import { apiFetch } from '../../../shared/api/client'
+import { API_BASE, getStoredToken } from '../../../shared/api/auth-storage'
 import { getModuleContext } from '../../../features/launcher/lib/getModuleContext'
 import JobNotesSection from '../components/JobNotesSection'
 import PurchaseSection from '../components/PurchaseSection'
@@ -79,8 +79,14 @@ export default function ReimbursementRequestPage () {
     }
 
     try {
-      const res = await apiFetch('/api/reimbursement-requests', {
+      const token = getStoredToken()
+
+      const res = await fetch(`${API_BASE}/api/reimbursement-requests`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
           companyKey: context.companyKey,
           divisionKey: context.divisionKey,
@@ -98,7 +104,7 @@ export default function ReimbursementRequestPage () {
         })
       })
 
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json()
 
       if (!res.ok) {
         setError(data?.error || 'Failed to submit reimbursement request.')
@@ -141,3 +147,7 @@ export default function ReimbursementRequestPage () {
     </FieldShellLayout>
   )
 }
+
+
+
+

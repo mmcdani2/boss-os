@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE, getStoredToken, setStoredToken, type LoginResponse } from "../../../shared/api/auth-storage";
+import { apiJson } from "../../../shared/api/client";
+import {
+  getStoredToken,
+  setStoredToken,
+  type LoginResponse,
+} from "../../../shared/api/auth-storage";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,24 +25,21 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const loginData = await apiJson<LoginResponse>("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        auth: false,
         body: JSON.stringify({ email, password }),
       });
 
-      const data = (await res.json()) as LoginResponse | { error?: string };
-
-      if (!res.ok) {
-        setError("error" in data ? data.error || "Login failed." : "Login failed.");
-        return;
-      }
-
-      const loginData = data as LoginResponse;
       setStoredToken(loginData.token);
       navigate("/dashboard");
-    } catch {
-      setError("Could not reach API.");
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message.trim().length > 0
+          ? err.message
+          : "Could not reach API.";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-
-
-

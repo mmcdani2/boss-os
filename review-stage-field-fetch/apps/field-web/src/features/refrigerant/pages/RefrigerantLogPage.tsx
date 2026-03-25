@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FieldShellLayout from '../../../shell/FieldShellLayout'
-import { apiFetch } from '../../../shared/api/client'
+import { API_BASE, getStoredToken } from '../../../shared/api/auth-storage'
 import { getModuleContext } from '../../../features/launcher/lib/getModuleContext'
 import JobInfoSection from '../components/JobInfoSection'
 import RefrigerantInfoSection from '../components/RefrigerantInfoSection'
@@ -57,8 +57,14 @@ export default function RefrigerantLogPage () {
     }
 
     try {
-      const res = await apiFetch('/api/refrigerant-logs', {
+      const token = getStoredToken()
+
+      const res = await fetch(`${API_BASE}/api/refrigerant-logs`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
           companyKey: context.companyKey,
           divisionKey: context.divisionKey,
@@ -75,7 +81,7 @@ export default function RefrigerantLogPage () {
         })
       })
 
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json()
 
       if (!res.ok) {
         setError(data?.error || 'Failed to submit log.')
@@ -120,3 +126,7 @@ export default function RefrigerantLogPage () {
     </FieldShellLayout>
   )
 }
+
+
+
+

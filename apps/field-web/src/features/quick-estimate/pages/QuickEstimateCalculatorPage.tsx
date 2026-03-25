@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import FieldLayout from "../../../components/FieldLayout";
+import FieldShellLayout from "../../../shell/FieldShellLayout";
 import { getModuleContext } from "../../../features/launcher/lib/getModuleContext";
 import {
   DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS,
@@ -102,7 +102,7 @@ export default function QuickEstimateCalculatorPage() {
   }
 
   return (
-    <FieldLayout
+    <FieldShellLayout
       kicker="BossOS Field"
       title="Quick Estimate Calculator"
       subtitle="Fast HVAC field pricing for rough estimates. Material, labor, trip, margin, done."
@@ -242,12 +242,12 @@ export default function QuickEstimateCalculatorPage() {
             </button>
 
             <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-semibold text-white/55">
-              Margin: {formatMarginLabel(selectedMargin)} • Labor Rate: {formatCurrency(settings.laborRate)}/hr
+              Margin: {formatMarginLabel(selectedMargin)} â€¢ Labor Rate: {formatCurrency(settings.laborRate)}/hr
             </div>
           </div>
         </div>
       </div>
-    </FieldLayout>
+    </FieldShellLayout>
   );
 }
 

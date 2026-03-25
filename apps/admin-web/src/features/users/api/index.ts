@@ -1,4 +1,4 @@
-import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
+﻿import { apiJson } from "../../../shared/api/client";
 
 export type AdminUser = {
   id: string;
@@ -17,36 +17,34 @@ export type CreateUserInput = {
   role: "admin" | "tech";
 };
 
-async function authedFetch(path: string, init?: RequestInit) {
-  const token = getStoredToken();
+type UsersListResponse = {
+  users?: AdminUser[];
+};
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers ?? {}),
-    },
-  });
+type UserResponse = {
+  user: AdminUser;
+};
 
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
+async function authedJson<T>(path: string, init?: RequestInit): Promise<T> {
+  try {
+    return await apiJson<T>(path, init);
+  } catch (error) {
     const message =
-      typeof data?.error === "string" ? data.error : "Request failed.";
+      error instanceof Error && error.message.trim().length > 0
+        ? error.message
+        : "Request failed.";
+
     throw new Error(message);
   }
-
-  return data;
 }
 
 export async function listUsers() {
-  const data = await authedFetch("/api/users");
+  const data = await authedJson<UsersListResponse>("/api/users");
   return (data.users ?? []) as AdminUser[];
 }
 
 export async function createUser(input: CreateUserInput) {
-  const data = await authedFetch("/api/users", {
+  const data = await authedJson<UserResponse>("/api/users", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -55,7 +53,7 @@ export async function createUser(input: CreateUserInput) {
 }
 
 export async function updateUserStatus(id: string, isActive: boolean) {
-  const data = await authedFetch(`/api/users/${id}/status`, {
+  const data = await authedJson<UserResponse>(`/api/users/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ isActive }),
   });
@@ -64,11 +62,10 @@ export async function updateUserStatus(id: string, isActive: boolean) {
 }
 
 export async function resetUserPassword(id: string, password: string) {
-  const data = await authedFetch(`/api/users/${id}/password`, {
+  const data = await authedJson<UserResponse>(`/api/users/${id}/password`, {
     method: "PATCH",
     body: JSON.stringify({ password }),
   });
 
   return data.user as AdminUser;
 }
-

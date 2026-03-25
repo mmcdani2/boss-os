@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import {
   createUser,
   listUsers,
@@ -141,7 +141,7 @@ export default function UsersPage() {
   }
 
   return (
-    <Layout
+    <AdminShellLayout
       kicker="BossOS"
       title="Users"
       subtitle="Manage internal user access for admin and field workflows."
@@ -406,7 +406,7 @@ export default function UsersPage() {
           </div>
         </div>
       ) : null}
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

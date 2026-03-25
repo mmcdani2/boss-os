@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import FieldLayout from "../../../components/FieldLayout";
-import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
+import FieldShellLayout from "../../../shell/FieldShellLayout";
+import { apiFetch } from "../../../shared/api/client";
 
 type LauncherModule = {
   id: string;
@@ -68,15 +68,8 @@ export default function HomePage() {
         setLoading(true);
         setError("");
 
-        const token = getStoredToken();
-
-        const res = await fetch(`${API_BASE}/api/auth/launcher`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
+        const res = await apiFetch("/api/auth/launcher");
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
           setError(data?.error || "Failed to load divisions.");
@@ -95,7 +88,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <FieldLayout
+    <FieldShellLayout
       kicker="BossOS Field"
       title="Divisions"
       subtitle="Choose a division first, then open the tools inside it."
@@ -133,9 +126,6 @@ export default function HomePage() {
           </>
         ) : null}
       </div>
-    </FieldLayout>
+    </FieldShellLayout>
   );
 }
-
-
-

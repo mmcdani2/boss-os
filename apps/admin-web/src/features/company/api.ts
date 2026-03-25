@@ -1,4 +1,4 @@
-import { API_BASE, getStoredToken } from "../../shared/api/auth-storage";
+﻿import { apiJson } from "../../shared/api/client";
 
 export type Company = {
   id: string;
@@ -9,40 +9,33 @@ export type Company = {
   updatedAt: string;
 };
 
-async function parseJson(res: Response) {
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || "Request failed.");
+type CompanyResponse = {
+  company: Company;
+};
+
+async function authedJson<T>(path: string, init?: RequestInit): Promise<T> {
+  try {
+    return await apiJson<T>(path, init);
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message.trim().length > 0
+        ? error.message
+        : "Request failed.";
+
+    throw new Error(message);
   }
-  return data;
 }
 
 export async function getCompany(): Promise<Company> {
-  const token = getStoredToken();
-
-  const res = await fetch(`${API_BASE}/api/company`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await parseJson(res);
+  const data = await authedJson<CompanyResponse>("/api/company");
   return data.company;
 }
 
 export async function updateCompanyName(name: string): Promise<Company> {
-  const token = getStoredToken();
-
-  const res = await fetch(`${API_BASE}/api/company`, {
+  const data = await authedJson<CompanyResponse>("/api/company", {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ name }),
   });
 
-  const data = await parseJson(res);
   return data.company;
 }
-

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import FieldShellLayout from "../../../shell/FieldShellLayout";
-import { apiFetch } from "../../../shared/api/client";
+import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
 type LauncherModule = {
   id: string;
@@ -104,8 +104,15 @@ export default function DivisionModulesPage() {
         setLoading(true);
         setError("");
 
-        const res = await apiFetch("/api/auth/launcher");
-        const data = await res.json().catch(() => ({}));
+        const token = getStoredToken();
+
+        const res = await fetch(`${API_BASE}/api/auth/launcher`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
 
         if (!res.ok) {
           setError(data?.error || "Failed to load modules.");
@@ -217,3 +224,5 @@ export default function DivisionModulesPage() {
     </FieldShellLayout>
   );
 }
+
+

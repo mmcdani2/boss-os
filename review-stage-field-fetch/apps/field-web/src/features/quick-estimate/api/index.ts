@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../shared/api/client";
+import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
 export type QuickEstimateCalculatorSettings = {
   laborRate: number;
@@ -46,17 +46,28 @@ export function normalizeQuickEstimateCalculatorSettings(
 }
 
 export async function loadQuickEstimateCalculatorSettings() {
+  const token = getStoredToken();
+
+  if (!token) {
+    return DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS;
+  }
+
   try {
-    const res = await apiFetch("/api/field-config/quick-estimate-calculator");
+    const res = await fetch(`${API_BASE}/api/field-config/quick-estimate-calculator`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!res.ok) {
       return DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS;
     }
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
     return normalizeQuickEstimateCalculatorSettings(data?.settings ?? data);
   } catch {
     return DEFAULT_QUICK_ESTIMATE_CALCULATOR_SETTINGS;
   }
 }
+

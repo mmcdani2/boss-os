@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 import DivisionModuleAssignmentsSection from "../components/DivisionModuleAssignmentsSection";
 import QuickEstimateSettingsSection from "../components/QuickEstimateSettingsSection";
@@ -239,7 +239,7 @@ export default function DivisionDetailPage() {
   }
 
   return (
-    <Layout
+    <AdminShellLayout
       title="Division Detail"
       subtitle="Review this division and the BossOS modules currently mapped to it."
     >
@@ -391,7 +391,7 @@ export default function DivisionDetailPage() {
           />
         ) : null}
       </div>
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

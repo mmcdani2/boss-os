@@ -1,4 +1,4 @@
-import {
+﻿import {
   createContext,
   useCallback,
   useContext,
@@ -7,7 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { API_BASE, clearStoredToken, getStoredToken } from "../../shared/api/auth-storage";
+import { apiJson } from "../../shared/api/client";
+import { clearStoredToken, getStoredToken } from "../../shared/api/auth-storage";
 
 type AuthUser = {
   id: string;
@@ -26,6 +27,12 @@ type AuthPermissions = {
   role: string;
   isAdmin: boolean;
   capabilities: string[];
+};
+
+type AuthMeResponse = {
+  user: AuthUser | null;
+  session: AuthSession | null;
+  permissions: AuthPermissions | null;
 };
 
 type AuthContextValue = {
@@ -67,19 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        logout();
-        setLoading(false);
-        return;
-      }
-
-      const data = await res.json();
+      const data = await apiJson<AuthMeResponse>("/api/auth/me");
 
       setUser(data.user ?? null);
       setSession(data.session ?? null);
@@ -120,5 +115,3 @@ export function useAuth() {
 
   return ctx;
 }
-
-

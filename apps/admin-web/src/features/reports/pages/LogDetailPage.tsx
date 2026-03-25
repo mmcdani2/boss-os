@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
 type RefrigerantLogDetail = {
@@ -226,7 +226,7 @@ export default function LogDetailPage() {
       : "Review submission details, technician information, and recorded refrigerant activity.";
 
   return (
-    <Layout kicker={kicker} title="Log Detail" subtitle={subtitle}>
+    <AdminShellLayout kicker={kicker} title="Log Detail" subtitle={subtitle}>
       {loading ? (
         <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-2xl">
           Loading log...
@@ -370,7 +370,7 @@ export default function LogDetailPage() {
                   {line.areaDescription}
                 </h3>
                 <div className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/55">
-                  {line.jobType} · {line.foamType}
+                  {line.jobType} Ã‚Â· {line.foamType}
                 </div>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -423,7 +423,7 @@ export default function LogDetailPage() {
           </div>
         </div>
       ) : null}
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

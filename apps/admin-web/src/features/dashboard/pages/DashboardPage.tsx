@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
 type DashboardStats = {
@@ -67,9 +67,9 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <Layout
+    <AdminShellLayout
       title="Dashboard"
-      subtitle="Quick view of refrigerant activity, technician usage, and today’s field submissions."
+      subtitle="Quick view of refrigerant activity, technician usage, and todayÃ¢â‚¬â„¢s field submissions."
     >
       {loading ? (
         <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-4 text-white/70 shadow-2xl sm:p-5">
@@ -105,7 +105,7 @@ export default function DashboardPage() {
           </p>
         </div>
       ) : null}
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

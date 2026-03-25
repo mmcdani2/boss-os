@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 import RefrigerantRecordsPanel from "../components/RefrigerantRecordsPanel";
 import ReimbursementRequestsPanel from "../components/ReimbursementRequestsPanel";
@@ -123,7 +123,7 @@ export default function LogsPage() {
   const showingReimbursementRequests = selectedModuleKey === "reimbursement-request";
 
   return (
-    <Layout
+    <AdminShellLayout
       title="Reports"
       subtitle="Choose a division, then choose a report module, then review the records inside it."
     >
@@ -193,7 +193,7 @@ export default function LogsPage() {
           </>
         ) : null}
       </div>
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Layout from "../../../components/Layout";
+import AdminShellLayout from "../../../shell/AdminShellLayout";
 import { API_BASE, getStoredToken } from "../../../shared/api/auth-storage";
 
 type ReimbursementRequestDetail = {
@@ -126,7 +126,7 @@ export default function ReimbursementRequestDetailPage() {
   }
 
   return (
-    <Layout
+    <AdminShellLayout
       title="Reimbursement Request Detail"
       subtitle="Review the submission and update its processing status."
     >
@@ -170,7 +170,7 @@ export default function ReimbursementRequestDetailPage() {
                     {request.techNameSnapshot}
                   </h2>
                   <p className="mt-2 text-sm text-white/65 sm:text-base">
-                    {request.vendor} • {request.purchaseDate}
+                    {request.vendor} Ã¢â‚¬Â¢ {request.purchaseDate}
                   </p>
                 </div>
 
@@ -344,7 +344,7 @@ export default function ReimbursementRequestDetailPage() {
           </>
         ) : null}
       </div>
-    </Layout>
+    </AdminShellLayout>
   );
 }
 

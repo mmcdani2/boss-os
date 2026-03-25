@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAuth } from "../app/providers/AuthProvider";
+import { useAuth } from "../../app/providers/AuthProvider";
 import {
   hasAllCapabilities,
   hasAnyCapability,

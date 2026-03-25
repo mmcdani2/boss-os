@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Layout from '../../../components/Layout'
+import AdminShellLayout from '../../../shell/AdminShellLayout'
 import { useCompany } from '../../../app/providers/CompanyProvider'
 
 export default function SettingsPage () {
@@ -46,7 +46,7 @@ export default function SettingsPage () {
   }
 
   return (
-    <Layout
+    <AdminShellLayout
       title='Settings'
       subtitle='Company profile and system-level configuration for this BossOS workspace.'
     >
@@ -134,7 +134,7 @@ export default function SettingsPage () {
           </form>
         </div>
       ) : null}
-    </Layout>
+    </AdminShellLayout>
   )
 }
 

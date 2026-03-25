@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import PermissionRoute from "./routes/PermissionRoute";
 import LoginPage from "../features/auth/pages/LoginPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import LogsPage from "../features/reports/pages/LogsPage";
@@ -70,17 +71,17 @@ export default function AppRouter() {
           <Route
             path="/users"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <UsersPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              <PermissionRoute adminOnly>
                 <SettingsPage />
-              </ProtectedRoute>
+              </PermissionRoute>
             }
           />
         </Routes>
