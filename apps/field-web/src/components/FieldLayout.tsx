@@ -1,5 +1,5 @@
-﻿import type { ReactNode } from "react";
-import FieldShellLayout from "../layouts/FieldShellLayout";
+import type { ReactNode } from "react";
+import FieldShellLayout from "../shell/FieldShellLayout";
 
 type FieldLayoutProps = {
   children: ReactNode;

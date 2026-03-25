@@ -1,15 +1,15 @@
-﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "../context/AuthContext";
-import ProtectedRoute from "../routes/ProtectedRoute";
-import LoginPage from "../pages/LoginPage";
-import HomePage from "../pages/HomePage";
-import DivisionModulesPage from "../pages/DivisionModulesPage";
-import RefrigerantLogPage from "../pages/RefrigerantLogPage";
-import QuickEstimateCalculatorPage from "../pages/QuickEstimateCalculatorPage";
-import ReimbursementRequestPage from "../pages/ReimbursementRequestPage";
-import SprayFoamJobLogPage from "../pages/SprayFoamJobLogPage";
-import MyLogsPage from "../pages/MyLogsPage";
-import LogDetailPage from "../pages/LogDetailPage";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./providers/AuthProvider";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import LoginPage from "../features/auth/pages/LoginPage";
+import HomePage from "../features/home/pages/HomePage";
+import DivisionModulesPage from "../features/launcher/pages/DivisionModulesPage";
+import RefrigerantLogPage from "../features/refrigerant/pages/RefrigerantLogPage";
+import QuickEstimateCalculatorPage from "../features/quick-estimate/pages/QuickEstimateCalculatorPage";
+import ReimbursementRequestPage from "../features/reimbursements/pages/ReimbursementRequestPage";
+import SprayFoamJobLogPage from "../features/spray-foam/pages/SprayFoamJobLogPage";
+import MyLogsPage from "../features/logs/pages/MyLogsPage";
+import LogDetailPage from "../features/logs/pages/LogDetailPage";
 
 export default function AppRouter() {
   return (
@@ -88,3 +88,6 @@ export default function AppRouter() {
     </BrowserRouter>
   );
 }
+
+
+

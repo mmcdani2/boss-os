@@ -1,15 +1,15 @@
-﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "../context/AuthContext";
-import ProtectedRoute from "../routes/ProtectedRoute";
-import LoginPage from "../pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage";
-import LogsPage from "../pages/LogsPage";
-import LogDetailPage from "../pages/LogDetailPage";
-import ReimbursementRequestDetailPage from "../pages/ReimbursementRequestDetailPage";
-import DivisionsPage from "../pages/DivisionsPage";
-import DivisionDetailPage from "../pages/DivisionDetailPage";
-import SettingsPage from "../pages/SettingsPage";
-import UsersPage from "../pages/UsersPage";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./providers/AuthProvider";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import LoginPage from "../features/auth/pages/LoginPage";
+import DashboardPage from "../features/dashboard/pages/DashboardPage";
+import LogsPage from "../features/reports/pages/LogsPage";
+import LogDetailPage from "../features/reports/pages/LogDetailPage";
+import ReimbursementRequestDetailPage from "../features/reports/pages/ReimbursementRequestDetailPage";
+import DivisionsPage from "../features/divisions/pages/DivisionsPage";
+import DivisionDetailPage from "../features/divisions/pages/DivisionDetailPage";
+import SettingsPage from "../features/settings/pages/SettingsPage";
+import UsersPage from "../features/users/pages/UsersPage";
 
 export default function AppRouter() {
   return (
@@ -88,3 +88,6 @@ export default function AppRouter() {
     </BrowserRouter>
   );
 }
+
+
+
