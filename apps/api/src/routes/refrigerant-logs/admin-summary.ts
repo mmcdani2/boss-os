@@ -1,12 +1,30 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { db } from "../../db/index.js";
-import { refrigerantLogs } from "../../db/schema.js";
+import {
+  refrigerantLogs,
+  reimbursementRequests,
+  sprayFoamJobLogs,
+} from "../../db/schema.js";
 import {
   requireAuth,
   type AuthedRequest,
 } from "../../middleware/require-auth.js";
 
 const router = Router();
+
+function toChicagoDateKey(value: Date | string | null | undefined) {
+  if (!value) return null;
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
 
 router.get(
   "/admin/stats/summary",
@@ -21,25 +39,40 @@ router.get(
         return res.status(403).json({ error: "Forbidden." });
       }
 
-      const logs = await db.select().from(refrigerantLogs);
+      const [refrigerant, reimbursements, sprayFoam] = await Promise.all([
+        db.select().from(refrigerantLogs),
+        db.select().from(reimbursementRequests),
+        db.select().from(sprayFoamJobLogs),
+      ]);
 
-      const totalLogs = logs.length;
+      const allRecords = [
+        ...refrigerant.map((row) => ({
+          userId: row.userId,
+          submittedAt: row.submittedAt,
+        })),
+        ...reimbursements.map((row) => ({
+          userId: row.userId,
+          submittedAt: row.submittedAt,
+        })),
+        ...sprayFoam.map((row) => ({
+          userId: row.userId,
+          submittedAt: row.submittedAt,
+        })),
+      ];
 
-      const today = new Date();
-      const yyyy = today.getUTCFullYear();
-      const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-      const dd = String(today.getUTCDate()).padStart(2, "0");
-      const todayKey = `${yyyy}-${mm}-${dd}`;
+      const todayKey = toChicagoDateKey(new Date());
 
-      const logsToday = logs.filter((log) => {
-        const submitted = new Date(log.submittedAt);
-        const sy = submitted.getUTCFullYear();
-        const sm = String(submitted.getUTCMonth() + 1).padStart(2, "0");
-        const sd = String(submitted.getUTCDate()).padStart(2, "0");
-        return `${sy}-${sm}-${sd}` === todayKey;
+      const logsToday = allRecords.filter((record) => {
+        return toChicagoDateKey(record.submittedAt) === todayKey;
       }).length;
 
-      const activeTechs = new Set(logs.map((log) => log.userId)).size;
+      const totalLogs = allRecords.length;
+
+      const activeTechs = new Set(
+        allRecords
+          .map((record) => record.userId)
+          .filter((value): value is string => typeof value === "string" && value.length > 0)
+      ).size;
 
       return res.json({
         totalLogs,
@@ -47,7 +80,7 @@ router.get(
         activeTechs,
       });
     } catch (error) {
-      console.error("Admin refrigerant log summary error:", error);
+      console.error("Admin combined summary error:", error);
       return res.status(500).json({ error: "Internal server error." });
     }
   },
