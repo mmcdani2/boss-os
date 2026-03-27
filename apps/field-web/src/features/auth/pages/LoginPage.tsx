@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../app/providers/AuthProvider";
 import { API_BASE, getStoredToken, setStoredToken, type LoginResponse } from "../../../shared/api/auth-storage";
 
 export default function LoginPage() {
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const token = getStoredToken();
+  const { refreshAuth } = useAuth();
 
   useEffect(() => {
     if (token) navigate("/home");
@@ -35,6 +37,7 @@ export default function LoginPage() {
 
       const loginData = data as LoginResponse;
       setStoredToken(loginData.token);
+      await refreshAuth();
       navigate("/home");
     } catch {
       setError("Could not reach API.");
