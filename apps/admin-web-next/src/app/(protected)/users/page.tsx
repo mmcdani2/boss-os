@@ -140,7 +140,7 @@ function UserRow({
         <div className="mt-1 truncate text-sm text-white/50">{user.email}</div>
       </div>
 
-      <div className="text-sm text-white/75">
+      <div className="text-sm text-white/75 lg:text-center">
         <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden">
           Role
         </div>
@@ -149,7 +149,7 @@ function UserRow({
         </span>
       </div>
 
-      <div>
+      <div className="lg:text-center">
         <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden">
           Status
         </div>
@@ -430,7 +430,7 @@ export default function UsersPage() {
           <Card className="flex min-h-0 flex-col overflow-hidden">
             <div className="shrink-0 border-b border-white/10 px-6 py-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
+                <div className="lg:text-left">
                   <SectionKicker>Directory</SectionKicker>
                   <h2 className="mt-2 text-2xl font-bold text-white">Current Users</h2>
                   <p className="mt-2 text-sm leading-6 text-white/60">
@@ -459,10 +459,10 @@ export default function UsersPage() {
             ) : (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="hidden shrink-0 grid-cols-[minmax(0,1.5fr)_120px_120px_300px] gap-5 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35 lg:grid">
-                  <div>User</div>
-                  <div>Role</div>
-                  <div>Status</div>
-                  <div className="text-right">Actions</div>
+                  <div className="lg:text-center">User</div>
+                  <div className="text-center">Role</div>
+                  <div className="text-center">Status</div>
+                  <div className="text-center">Actions</div>
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto">
@@ -537,3 +537,4 @@ export default function UsersPage() {
     </div>
   );
 }
+

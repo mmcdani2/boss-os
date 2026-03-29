@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthBootstrap";
 import { adminNavItems } from "@/shared/nav/admin-nav";
 import AdminSidebar from "@/shell/AdminSidebar";
-import AdminTopbar from "@/shell/AdminTopbar";
 
 type AdminShellLayoutProps = {
   children: ReactNode;
@@ -68,14 +67,27 @@ export default function AdminShellLayout({
           </aside>
 
           <div className="min-w-0 rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)] lg:flex lg:h-[calc(100vh-32px)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
-            <AdminTopbar
-              title={title}
-              onOpenMobileNav={() => setMobileNavOpen(true)}
-            />
-
             <main className="min-w-0 px-4 py-5 sm:px-5 sm:py-5 lg:flex-1 lg:min-h-0 lg:overflow-hidden lg:px-6 lg:py-6 xl:px-7 xl:py-7">
-              <div className="mx-auto w-full min-w-0 lg:flex lg:h-full lg:min-h-0">
-                {children}
+              <div className="mx-auto flex w-full min-w-0 flex-col gap-4 lg:h-full lg:min-h-0">
+                <div className="flex items-center justify-between lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setMobileNavOpen(true)}
+                    className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
+                  >
+                    Menu
+                  </button>
+
+                  {title ? (
+                    <div className="text-sm font-semibold tracking-tight text-white/75">
+                      {title}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="min-w-0 lg:flex lg:h-full lg:min-h-0">
+                  {children}
+                </div>
               </div>
             </main>
           </div>
@@ -102,7 +114,7 @@ export default function AdminShellLayout({
                 aria-label="Close navigation"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
               >
-                <span className="text-lg leading-none">×</span>
+                <span className="text-lg leading-none">x</span>
               </button>
             </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { getCompany, updateCompanyName, type Company } from "@/features/company/api";
 
 type CompanyContextValue = {
@@ -13,7 +13,7 @@ type CompanyContextValue = {
 
 const CompanyContext = createContext<CompanyContextValue | undefined>(undefined);
 
-export function CompanyProvider({ children }: { children: React.ReactNode }) {
+export function CompanyProvider({ children }: { children: ReactNode }) {
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
