@@ -313,8 +313,8 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
-      <div className="mx-auto flex min-h-0 w-full flex-1 flex-col gap-4 lg:w-[90%]">
+    <div className="flex h-full min-h-0 w-full flex-col gap-6">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
         <div className="shrink-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(249,115,22,0.08),rgba(255,255,255,0.02))] px-7 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-3xl">
@@ -330,13 +330,13 @@ export default function UsersPage() {
             <div className="grid grid-cols-3 gap-3 sm:min-w-90">
               <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3.5">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
-                  Total Users
+                  Total
                 </div>
                 <div className="mt-2 text-[2rem] font-black leading-none text-white">{users.length}</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3.5">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
-                  Active Users
+                  Active
                 </div>
                 <div className="mt-2 text-[2rem] font-black leading-none text-white">{activeCount}</div>
               </div>
@@ -537,4 +537,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
 

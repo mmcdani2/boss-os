@@ -1,90 +1,144 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { apiFetch, apiJson } from "@/lib/api/client";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { apiJson, apiFetch } from "@/lib/api/client";
 
-type ReimbursementRequestDetail = {
+type RefrigerantLogDetail = {
   id: string;
-  userId: string;
+  customerName: string | null;
+  techNameSnapshot: string;
+  companyKey: string;
+  jobNumber: string | null;
+  city: string | null;
+  state: string | null;
+  equipmentType: string | null;
+  refrigerantType: string;
+  poundsAdded: string | number | null;
+  poundsRecovered: string | number | null;
+  leakSuspected: boolean;
+  notes: string | null;
+  submittedAt: string;
+};
+
+type SprayFoamAreaLineDetail = {
+  id: string;
+  lineNumber: number;
+  areaDescription: string;
+  jobType: string;
+  foamType: string;
+  squareFeet: string | null;
+  thicknessInches: string | null;
+  boardFeet: string | null;
+};
+
+type SprayFoamMaterialLineDetail = {
+  id: string;
+  lineNumber: number;
+  foamType: string;
+  manufacturer: string;
+  lotNumber: string;
+  setsUsed: string | null;
+  theoreticalYieldPerSet: string | null;
+  theoreticalTotalYield: string | null;
+  actualYield: string | null;
+  yieldPercent: string | null;
+};
+
+type SprayFoamLogDetail = {
+  id: string;
+  customerName: string | null;
+  techNameSnapshot: string;
   companyKey: string;
   divisionKey: string | null;
-  techNameSnapshot: string;
-  amountSpent: string;
-  purchaseDate: string;
-  vendor: string;
-  category: string;
-  paymentMethod: string;
-  purpose: string;
-  tiedToJob: boolean;
   jobNumber: string | null;
-  notes: string | null;
-  receiptUploaded: boolean;
-  urgentReimbursementNeeded: boolean;
-  status: string;
-  reimbursementDate: string | null;
-  reviewedAt: string | null;
-  reviewedByUserId: string | null;
+  jobDate: string | null;
+  crewLead: string | null;
+  helpersText: string | null;
+  rigName: string | null;
+  timeOnJob: string | null;
+  ambientTempF: string | null;
+  substrateTempF: string | null;
+  humidityPercent: string | null;
+  downtimeMinutes: number | null;
+  downtimeReason: string | null;
+  otherNotes: string | null;
+  photosUploadedToHcp: boolean;
   submittedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  areaLines: SprayFoamAreaLineDetail[];
+  materialLines: SprayFoamMaterialLineDetail[];
 };
 
-type ReimbursementRequestResponse = {
-  request?: ReimbursementRequestDetail | null;
+type LogType = "refrigerant" | "spray-foam";
+
+type LogResponse<T> = {
+  log?: T;
 };
 
-function formatCurrency(value: string) {
-  const amount = Number(value);
-  return Number.isFinite(amount)
-    ? amount.toLocaleString("en-US", { style: "currency", currency: "USD" })
-    : value;
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | boolean | null | undefined;
+}) {
+  const displayValue =
+    value !== null && value !== undefined && value !== "" ? String(value) : "N/A";
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
+        {label}
+      </div>
+      <div className="mt-1 text-base font-semibold text-white">{displayValue}</div>
+    </div>
+  );
 }
 
-function statusTone(status: string) {
-  switch (status) {
-    case "approved":
-      return "bg-blue-500/15 text-blue-300";
-    case "denied":
-      return "bg-red-500/15 text-red-300";
-    case "reimbursed":
-      return "bg-emerald-500/15 text-emerald-300";
-    default:
-      return "bg-white/10 text-white/60";
-  }
-}
-
-function formatDateTime(value: string | null) {
-  if (!value) return "N/A";
-
+function formatSubmittedAt(value: string) {
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
 
   return parsed.toLocaleString();
 }
 
-export default function ReimbursementRequestDetailPage() {
+export default function LogDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const id = params?.id;
+  const searchParams = useSearchParams();
 
-  const [request, setRequest] = useState<ReimbursementRequestDetail | null>(null);
+  const id = params?.id;
+  const logType: LogType = useMemo(() => {
+    return searchParams.get("type") === "spray-foam" ? "spray-foam" : "refrigerant";
+  }, [searchParams]);
+
+  const [refrigerantLog, setRefrigerantLog] = useState<RefrigerantLogDetail | null>(null);
+  const [sprayFoamLog, setSprayFoamLog] = useState<SprayFoamLogDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [savingStatus, setSavingStatus] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    async function loadRequest() {
+    async function loadLog() {
       if (!id) return;
 
       try {
         setLoading(true);
         setError("");
-        setMessage("");
+        setRefrigerantLog(null);
+        setSprayFoamLog(null);
 
-        const data = await apiJson<ReimbursementRequestResponse>(`/api/reimbursement-requests/${id}`);
-        setRequest(data.request ?? null);
+        if (logType === "spray-foam") {
+          const data = await apiJson<LogResponse<SprayFoamLogDetail>>(`/api/spray-foam-logs/${id}`);
+          setSprayFoamLog(data.log ?? null);
+          return;
+        }
+
+        const data = await apiJson<LogResponse<RefrigerantLogDetail>>(`/api/refrigerant-logs/${id}`);
+        setRefrigerantLog(data.log ?? null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not reach API.");
       } finally {
@@ -92,43 +146,56 @@ export default function ReimbursementRequestDetailPage() {
       }
     }
 
-    void loadRequest();
-  }, [id]);
+    void loadLog();
+  }, [id, logType]);
 
-  async function updateStatus(status: string) {
-    if (!request) return;
+  async function handleDeleteSprayFoamLog() {
+    if (!id || logType !== "spray-foam") return;
+
+    const confirmed = window.confirm(
+      "Delete this spray foam job log permanently? This will also delete area lines and material lines."
+    );
+
+    if (!confirmed) return;
 
     try {
-      setSavingStatus(status);
+      setDeleting(true);
       setError("");
-      setMessage("");
 
-      const response = await apiFetch(`/api/reimbursement-requests/${request.id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
+      await apiFetch(`/api/spray-foam-logs/${id}`, {
+        method: "DELETE",
       });
 
-      const data = (await response.json()) as ReimbursementRequestResponse;
-
-      if (!response.ok) {
-        setError("Failed to update reimbursement status.");
-        return;
-      }
-
-      setRequest(data.request ?? null);
-      setMessage(`Status updated to ${status}.`);
+      router.push("/logs");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reach API.");
     } finally {
-      setSavingStatus("");
+      setDeleting(false);
     }
   }
 
+  const sprayFoamTotalBoardFeet = sprayFoamLog?.areaLines.reduce((sum, line) => {
+    const value = line.boardFeet ? Number(line.boardFeet) : 0;
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+
+  const sprayFoamTotalSetsUsed = sprayFoamLog?.materialLines.reduce((sum, line) => {
+    const value = line.setsUsed ? Number(line.setsUsed) : 0;
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+
+  const sprayFoamTheoreticalTotalYield = sprayFoamLog?.materialLines.reduce((sum, line) => {
+    const value = line.theoreticalTotalYield ? Number(line.theoreticalTotalYield) : 0;
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+
+  const sprayFoamOverallYieldPercent =
+    sprayFoamTotalBoardFeet && sprayFoamTheoreticalTotalYield && sprayFoamTheoreticalTotalYield > 0
+      ? ((sprayFoamTotalBoardFeet / sprayFoamTheoreticalTotalYield) * 100).toFixed(2)
+      : "0.00";
+
   return (
-    <div className="flex h-full min-h-0 w-full flex-col gap-6 overflow-y-auto pr-1">
+    <div className="w-full space-y-6">
       <div className="shrink-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(249,115,22,0.08),rgba(255,255,255,0.02))] px-7 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
@@ -136,10 +203,12 @@ export default function ReimbursementRequestDetailPage() {
               Reports
             </p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-[2.2rem]">
-              Reimbursement Request Detail
+              Log Detail
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60 sm:text-[15px]">
-              Review the submission and update its processing status.
+              {logType === "spray-foam"
+                ? "Review the full spray foam job submission, production output, and material usage."
+                : "Review submission details, technician information, and recorded refrigerant activity."}
             </p>
           </div>
 
@@ -155,7 +224,7 @@ export default function ReimbursementRequestDetailPage() {
 
       {loading ? (
         <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 text-white/70 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
-          Loading reimbursement request...
+          Loading log...
         </div>
       ) : null}
 
@@ -165,196 +234,179 @@ export default function ReimbursementRequestDetailPage() {
         </div>
       ) : null}
 
-      {message ? (
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-200">
-          {message}
+      {!loading && !error && refrigerantLog ? (
+        <div className="grid gap-5">
+          <section className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+              Submission
+            </div>
+            <h2 className="mt-3 text-2xl font-bold text-white">
+              {refrigerantLog.customerName || "No customer name"}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-white/60">
+              Submitted by {refrigerantLog.techNameSnapshot} on {formatSubmittedAt(refrigerantLog.submittedAt)}
+            </p>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <DetailRow label="Tech" value={refrigerantLog.techNameSnapshot} />
+            <DetailRow label="Job Number" value={refrigerantLog.jobNumber} />
+            <DetailRow
+              label="Location"
+              value={[refrigerantLog.city, refrigerantLog.state].filter(Boolean).join(", ")}
+            />
+            <DetailRow label="Equipment Type" value={refrigerantLog.equipmentType} />
+            <DetailRow label="Refrigerant Type" value={refrigerantLog.refrigerantType} />
+            <DetailRow label="Leak Suspected" value={refrigerantLog.leakSuspected ? "Yes" : "No"} />
+            <DetailRow label="Pounds Added" value={refrigerantLog.poundsAdded} />
+            <DetailRow label="Pounds Recovered" value={refrigerantLog.poundsRecovered} />
+            <DetailRow label="Company Key" value={refrigerantLog.companyKey} />
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+              Notes
+            </div>
+            <div className="mt-3 text-sm leading-7 text-white/75">
+              {refrigerantLog.notes || "No notes submitted."}
+            </div>
+          </section>
         </div>
       ) : null}
 
-      {!loading && !error && request ? (
-        <>
-          <section className="rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
-            <div className="flex items-start justify-between gap-4">
+      {!loading && !error && sprayFoamLog ? (
+        <div className="grid gap-5">
+          <section className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
                   Submission
                 </div>
                 <h2 className="mt-3 text-2xl font-bold text-white">
-                  {request.techNameSnapshot}
+                  {sprayFoamLog.customerName || "No customer name"}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-white/60 sm:text-base">
-                  {request.purchaseDate} at {request.vendor}
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Submitted by {sprayFoamLog.techNameSnapshot} on {formatSubmittedAt(sprayFoamLog.submittedAt)}
                 </p>
               </div>
 
-              <div
-                className={[
-                  "rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em]",
-                  statusTone(request.status),
-                ].join(" ")}
+              <button
+                type="button"
+                onClick={handleDeleteSprayFoamLog}
+                disabled={deleting}
+                className="inline-flex h-11 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-medium text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {request.status}
-              </div>
+                {deleting ? "Deleting..." : "Delete Log"}
+              </button>
             </div>
+          </section>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Amount
-                </div>
-                <div className="mt-1 text-base font-semibold text-white">
-                  {formatCurrency(request.amountSpent)}
-                </div>
-              </div>
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <DetailRow label="Job Date" value={sprayFoamLog.jobDate} />
+            <DetailRow label="Job Number" value={sprayFoamLog.jobNumber} />
+            <DetailRow label="Crew Lead" value={sprayFoamLog.crewLead} />
+            <DetailRow label="Helpers" value={sprayFoamLog.helpersText} />
+            <DetailRow label="Rig" value={sprayFoamLog.rigName} />
+            <DetailRow label="Time On Job" value={sprayFoamLog.timeOnJob} />
+            <DetailRow label="Ambient Temp (F)" value={sprayFoamLog.ambientTempF} />
+            <DetailRow label="Substrate Temp (F)" value={sprayFoamLog.substrateTempF} />
+            <DetailRow label="Humidity (%)" value={sprayFoamLog.humidityPercent} />
+            <DetailRow label="Downtime Minutes" value={sprayFoamLog.downtimeMinutes} />
+            <DetailRow label="Downtime Reason" value={sprayFoamLog.downtimeReason} />
+            <DetailRow
+              label="Photos Uploaded To HCP"
+              value={sprayFoamLog.photosUploadedToHcp ? "Yes" : "No"}
+            />
+          </section>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Division
-                </div>
-                <div className="mt-1 text-base font-semibold text-white">
-                  {request.divisionKey || "N/A"}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Category
-                </div>
-                <div className="mt-1 text-base font-semibold text-white">
-                  {request.category}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Payment Method
-                </div>
-                <div className="mt-1 text-base font-semibold text-white">
-                  {request.paymentMethod}
-                </div>
-              </div>
-            </div>
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <DetailRow label="Area Line Count" value={sprayFoamLog.areaLines.length} />
+            <DetailRow
+              label="Total Board Feet"
+              value={sprayFoamTotalBoardFeet ? sprayFoamTotalBoardFeet.toFixed(2) : "0.00"}
+            />
+            <DetailRow
+              label="Total Sets Used"
+              value={sprayFoamTotalSetsUsed ? sprayFoamTotalSetsUsed.toFixed(2) : "0.00"}
+            />
+            <DetailRow label="Overall Yield %" value={`${sprayFoamOverallYieldPercent}%`} />
           </section>
 
           <section className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
             <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
-              Request Details
+              Other Notes
             </div>
-
-            <div className="mt-4 grid gap-4">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  What Was It For?
-                </div>
-                <div className="mt-1 text-base text-white">
-                  {request.purpose}
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                    Tied to Job
-                  </div>
-                  <div className="mt-1 text-base text-white">
-                    {request.tiedToJob ? "Yes" : "No"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                    Job Number
-                  </div>
-                  <div className="mt-1 text-base text-white">
-                    {request.jobNumber || "N/A"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                    Receipt Uploaded
-                  </div>
-                  <div className="mt-1 text-base text-white">
-                    {request.receiptUploaded ? "Yes" : "No"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                    Urgent Reimbursement Needed
-                  </div>
-                  <div className="mt-1 text-base text-white">
-                    {request.urgentReimbursementNeeded ? "Yes" : "No"}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Additional Notes
-                </div>
-                <div className="mt-1 text-base text-white">
-                  {request.notes || "None"}
-                </div>
-              </div>
+            <div className="mt-3 text-sm leading-7 text-white/75">
+              {sprayFoamLog.otherNotes || "No notes submitted."}
             </div>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
-              Workflow
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => void updateStatus("approved")}
-                disabled={savingStatus.length > 0}
-                className="h-12 rounded-2xl bg-blue-500/80 px-4 text-sm font-black text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {savingStatus === "approved" ? "Saving..." : "Approve"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => void updateStatus("denied")}
-                disabled={savingStatus.length > 0}
-                className="h-12 rounded-2xl bg-red-500/80 px-4 text-sm font-black text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {savingStatus === "denied" ? "Saving..." : "Deny"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => void updateStatus("reimbursed")}
-                disabled={savingStatus.length > 0}
-                className="h-12 rounded-2xl bg-emerald-500/80 px-4 text-sm font-black text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {savingStatus === "reimbursed" ? "Saving..." : "Mark Reimbursed"}
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Reviewed At
-                </div>
-                <div className="mt-1 text-base text-white">
-                  {formatDateTime(request.reviewedAt)}
-                </div>
+          <div className="grid gap-4">
+            <section className="rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+                Area Lines
               </div>
+              <h3 className="mt-3 text-2xl font-bold text-white">Installed output</h3>
+            </section>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Reimbursement Date
+            {sprayFoamLog.areaLines.map((line) => (
+              <section
+                key={line.id}
+                className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6"
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+                  Area Line {line.lineNumber}
                 </div>
-                <div className="mt-1 text-base text-white">
-                  {formatDateTime(request.reimbursementDate)}
+                <h3 className="mt-2 text-xl font-bold text-white">{line.areaDescription}</h3>
+                <div className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/55">
+                  {line.jobType} · {line.foamType}
                 </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <DetailRow label="Square Feet" value={line.squareFeet} />
+                  <DetailRow label="Average Thickness (Inches)" value={line.thicknessInches} />
+                  <DetailRow label="Board Feet" value={line.boardFeet} />
+                </div>
+              </section>
+            ))}
+          </div>
+
+          <div className="grid gap-4">
+            <section className="rounded-3xl border border-white/10 bg-[#141414] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+                Material Lines
               </div>
-            </div>
-          </section>
-        </>
+              <h3 className="mt-3 text-2xl font-bold text-white">Actual material usage</h3>
+            </section>
+
+            {sprayFoamLog.materialLines.map((line) => (
+              <section
+                key={line.id}
+                className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6"
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-400/80">
+                  Material Line {line.lineNumber}
+                </div>
+                <h3 className="mt-2 text-xl font-bold text-white">{line.manufacturer}</h3>
+                <div className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/55">
+                  {line.foamType}
+                </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <DetailRow label="Lot Number" value={line.lotNumber} />
+                  <DetailRow label="Sets Used" value={line.setsUsed} />
+                  <DetailRow label="Theoretical Yield / Set" value={line.theoreticalYieldPerSet} />
+                  <DetailRow label="Theoretical Total Yield" value={line.theoreticalTotalYield} />
+                  <DetailRow label="Actual Yield" value={line.actualYield} />
+                  <DetailRow
+                    label="Yield Percent"
+                    value={line.yieldPercent ? `${line.yieldPercent}%` : "N/A"}
+                  />
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
       ) : null}
     </div>
   );
