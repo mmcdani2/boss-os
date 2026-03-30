@@ -67,9 +67,9 @@ export default function AdminShellLayout({
           </aside>
 
           <div className="min-w-0 rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)] lg:flex lg:h-[calc(100vh-32px)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
-            <main className="min-w-0 px-4 py-5 sm:px-5 sm:py-5 lg:flex-1 lg:min-h-0 lg:overflow-hidden lg:px-6 lg:py-6 xl:px-7 xl:py-7">
+            <main className="min-w-0 px-4 py-5 sm:px-5 sm:py-5 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:overflow-hidden lg:px-6 lg:py-6 xl:px-7 xl:py-7">
               <div className="mx-auto flex w-full min-w-0 flex-col gap-4 lg:h-full lg:min-h-0">
-                <div className="flex items-center justify-between lg:hidden">
+                <div className="shrink-0 flex items-center justify-between lg:hidden">
                   <button
                     type="button"
                     onClick={() => setMobileNavOpen(true)}
@@ -85,7 +85,7 @@ export default function AdminShellLayout({
                   ) : null}
                 </div>
 
-                <div className="min-w-0 lg:flex lg:h-full lg:min-h-0">
+                <div className="flex min-w-0 flex-1 flex-col lg:min-h-0">
                   {children}
                 </div>
               </div>

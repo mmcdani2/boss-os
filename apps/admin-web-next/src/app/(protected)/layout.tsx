@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ReactNode } from "react";
 import AuthBootstrap from "@/components/auth/AuthBootstrap";
@@ -11,7 +11,11 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     <AuthBootstrap>
       <RequireAdmin>
         <CompanyProvider>
-          <AdminShellLayout>{children}</AdminShellLayout>
+          <AdminShellLayout>
+            <div className="flex h-full min-h-0 w-full flex-col">
+              {children}
+            </div>
+          </AdminShellLayout>
         </CompanyProvider>
       </RequireAdmin>
     </AuthBootstrap>

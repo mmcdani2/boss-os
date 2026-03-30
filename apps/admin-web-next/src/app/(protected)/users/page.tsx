@@ -107,7 +107,7 @@ function ActionButton({
       disabled={disabled}
       onClick={onClick}
       className={[
-        "inline-flex h-10 min-w-[140px] items-center justify-center rounded-2xl px-4 text-sm font-medium transition",
+        "inline-flex h-10 min-w-35 items-center justify-center rounded-2xl px-4 text-sm font-medium transition",
         "disabled:cursor-not-allowed disabled:opacity-60",
         styles,
       ].join(" ")}
@@ -327,7 +327,7 @@ export default function UsersPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 sm:min-w-[360px]">
+            <div className="grid grid-cols-3 gap-3 sm:min-w-90">
               <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3.5">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
                   Total Users
@@ -441,7 +441,7 @@ export default function UsersPage() {
                 <button
                   type="button"
                   onClick={() => void loadUsers()}
-                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/90 transition hover:bg-white/[0.08]"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-white/10 bg-white/4 px-4 text-sm font-medium text-white/90 transition hover:bg-white/8"
                 >
                   Refresh
                 </button>
