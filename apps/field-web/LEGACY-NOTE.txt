@@ -1,0 +1,6 @@
+﻿LEGACY APP
+
+This Vite field app is legacy.
+Active migration target and current working app: apps/field-web-next
+
+Do not add new features here unless explicitly needed for fallback or migration comparison.
