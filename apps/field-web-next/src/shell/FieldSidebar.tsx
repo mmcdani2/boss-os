@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
-import type { FieldNavItem } from "@/shared\nav\types";
+import type { FieldNavItem } from "@/shared/nav/types";
 
 type FieldSidebarProps = {
   items: FieldNavItem[];
@@ -119,3 +119,4 @@ export default function FieldSidebar({
     </div>
   );
 }
+
