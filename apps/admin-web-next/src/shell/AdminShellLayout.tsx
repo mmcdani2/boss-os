@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -104,8 +105,10 @@ export default function AdminShellLayout({
           />
           <div className="absolute inset-y-0 left-0 flex w-[88vw] max-w-[320px] min-h-0 flex-col border-r border-white/10 bg-[#0f0f0f] shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
             <div className="shrink-0 flex items-center justify-between border-b border-white/10 px-5 py-4">
-              <div className="text-lg font-semibold tracking-tight text-white">
-                Navigation
+              <div className="flex items-center gap-3">
+                <div className="text-lg font-semibold tracking-tight text-white">
+                  Navigation
+                </div>
               </div>
 
               <button

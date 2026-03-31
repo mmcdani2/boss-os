@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import FieldSidebar from "@/shell/FieldSidebar";
-import FieldTopbar from "@/shell/FieldTopbar";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { fieldNavItems } from "@/shared/nav/field-nav";
 
@@ -72,12 +71,6 @@ export default function FieldShellLayout({
           </aside>
 
           <div className="min-w-0 rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)] lg:flex lg:h-[calc(100vh-32px)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
-            <FieldTopbar
-              kicker={kicker}
-              title={title}
-              subtitle={subtitle}
-              onOpenMobileNav={() => setMobileNavOpen(true)}
-            />
 
             <main className="min-w-0 px-4 py-5 sm:px-5 sm:py-5 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:overflow-hidden lg:px-6 lg:py-6 xl:px-7 xl:py-7">
               <div className="mx-auto flex w-full min-w-0 flex-col gap-4 lg:h-full lg:min-h-0">
@@ -101,7 +94,7 @@ export default function FieldShellLayout({
           <div className="absolute inset-y-0 left-0 flex w-[88vw] max-w-[320px] min-h-0 flex-col border-r border-white/10 bg-[#0f0f0f] shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
             <div className="shrink-0 flex items-center justify-between border-b border-white/10 px-5 py-4">
               <div className="text-lg font-semibold tracking-tight text-white">
-                Navigation
+                Menu
               </div>
 
               <button

@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+﻿import Image from "next/image";
+import Link from "next/link";
 import type { AdminNavItem } from "@/shared/nav/types";
 
 type AdminSidebarProps = {
@@ -39,10 +40,17 @@ export default function AdminSidebar({
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#0f0f0f] text-white">
       <div className="shrink-0 border-b border-white/10 px-5 py-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-400/80">
-          BossOS
+        <div className="w-fit">
+          <Image
+            src="/brand/bossos-mark.png"
+            alt="BossOS"
+            width={140}
+            height={40}
+            priority
+            className="h-auto w-[132px]"
+          />
         </div>
-        <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+        <div className="mt-4 text-2xl font-semibold tracking-tight text-white">
           Admin
         </div>
       </div>

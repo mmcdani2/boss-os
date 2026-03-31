@@ -5,8 +5,11 @@ import { AuthProvider } from "@/app/providers/AuthProvider";
 export const metadata: Metadata = {
   title: "BossOS Field",
   description: "Field tools, logs, and division workflows.",
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon-field.ico",
+    shortcut: "/favicon-field.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 

@@ -41,10 +41,13 @@ export default function FieldSidebar({
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#0f0f0f] text-white">
       <div className="shrink-0 border-b border-white/10 px-5 py-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-400/80">
-          BossOS
-        </div>
-        <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+        <img
+          src="/brand/bossos-mark.png"
+          alt="BossOS"
+          className="block h-auto w-[132px]"
+        />
+
+        <div className="mt-4 text-2xl font-semibold tracking-tight text-white">
           Field
         </div>
         <p className="mt-2 text-sm text-white/60">
@@ -119,4 +122,3 @@ export default function FieldSidebar({
     </div>
   );
 }
-

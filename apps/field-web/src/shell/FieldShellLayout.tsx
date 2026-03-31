@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FieldSidebar from "../shell/FieldSidebar";
-import FieldTopbar from "../shell/FieldTopbar";
 import { useAuth } from "../app/providers/AuthProvider";
 import { clearStoredToken } from "../shared/api/auth-storage";
 import { fieldNavItems } from "../shared/nav/field-nav";
@@ -74,13 +73,6 @@ export default function FieldShellLayout({
             </aside>
 
             <div className="min-w-0">
-              <FieldTopbar
-                kicker={kicker}
-                title={title}
-                subtitle={subtitle}
-                onOpenMobileNav={() => setMobileNavOpen(true)}
-              />
-
               <main className="min-w-0 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                 <div className="mx-auto w-full max-w-[1200px] min-w-0">
                   {children}

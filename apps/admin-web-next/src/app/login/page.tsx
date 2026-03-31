@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api/client";
@@ -70,41 +71,45 @@ export default function LoginPage() {
       <div className="mx-auto flex min-h-screen max-w-[1600px] items-center justify-center px-3 py-3 sm:px-5 sm:py-5">
         <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
           <div className="border-b border-white/10 px-6 py-6 sm:px-8 sm:py-8">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-400/80">
-              BossOS
+            <div className="mx-auto w-fit px-4 py-3">
+              <Image
+                src="/brand/bossos-wordmark-master.png"
+                alt="BossOS"
+                width={180}
+                height={120}
+                priority
+                className="h-auto w-[160px] sm:w-[180px]"
+              />
             </div>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+
+            <h1 className="mt-5 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Admin Login
             </h1>
-            <p className="mt-3 max-w-md text-sm leading-6 text-white/60 sm:text-[15px]">
+            <p className="mt-3 max-w-md text-center text-sm leading-6 text-white/60 sm:mx-auto sm:text-[15px]">
               Sign in to access operations, logs, divisions, users, and settings.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-5 px-6 py-6 sm:px-8 sm:py-8">
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-white/80">Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                autoComplete="email"
-                required
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-orange-400/50 focus:bg-white/[0.07]"
-              />
-            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+              placeholder="Email"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/[0.07]"
+            />
 
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-white/80">Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-                required
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-orange-400/50 focus:bg-white/[0.07]"
-              />
-            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+              placeholder="Password"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/[0.07]"
+            />
 
             {error ? (
               <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200">

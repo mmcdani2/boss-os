@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -10,121 +11,126 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const token = getStoredToken();
   const { refreshAuth } = useAuth();
 
   useEffect(() => {
-    if (token) router.replace("/home");
+    if (token) {
+      router.replace("/home");
+    }
   }, [token, router]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = (await res.json()) as LoginResponse | { error?: string };
+      const raw = await response.text();
+      let data: LoginResponse | { error?: string; message?: string } = {};
 
-      if (!res.ok) {
-        setError("error" in data ? data.error || "Login failed." : "Login failed.");
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        setError(
+          "error" in data
+            ? data.error || data.message || raw || "Login failed."
+            : "Login failed."
+        );
         return;
       }
 
       const loginData = data as LoginResponse;
+
+      if (!loginData.token) {
+        setError("Login succeeded but no token was returned.");
+        return;
+      }
+
       setStoredToken(loginData.token);
       await refreshAuth();
       router.replace("/home");
-    } catch {
-      setError("Could not reach API.");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to reach the server.");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center bg-black text-white">
-      <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
-        <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-          <div className="px-5 py-6 sm:px-6 sm:py-8">
-            <section className="mb-6 sm:mb-8">
-              <p className="text-[12px] font-bold uppercase tracking-[0.28em] text-orange-400">
-                BossOS
-              </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-white sm:text-5xl">
-                Tech Login
-              </h1>
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
-                Sign in to access field tools, logs, and daily division workflows.
-              </p>
-            </section>
-
-            <div className="mx-auto max-w-xl">
-              <form
-                onSubmit={handleSubmit}
-                className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 shadow-2xl sm:p-6"
-              >
-                <div className="grid gap-5">
-                  <div className="grid gap-2">
-                    <label
-                      htmlFor="email"
-                      className="text-sm font-semibold uppercase tracking-[0.18em] text-white/75"
-                    >
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      className="h-16 w-full rounded-2xl border border-white/10 bg-[#0d0d0d] px-5 text-lg text-white outline-none transition placeholder:text-white/30 focus:border-orange-400/60"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <label
-                      htmlFor="password"
-                      className="text-sm font-semibold uppercase tracking-[0.18em] text-white/75"
-                    >
-                      Password
-                    </label>
-                    <input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
-                      className="h-16 w-full rounded-2xl border border-white/10 bg-[#0d0d0d] px-5 text-lg text-white outline-none transition placeholder:text-white/30 focus:border-orange-400/60"
-                    />
-                  </div>
-
-                  {error ? (
-                    <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200">
-                      {error}
-                    </div>
-                  ) : null}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="h-16 rounded-2xl bg-[#fbbf24] px-5 text-lg font-black text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {loading ? "Logging in..." : "Log In"}
-                  </button>
-                </div>
-              </form>
+    <main className="min-h-screen bg-black text-white">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] items-center justify-center px-3 py-3 sm:px-5 sm:py-5">
+        <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
+          <div className="border-b border-white/10 px-6 py-6 sm:px-8 sm:py-8">
+            <div className="mx-auto w-fit px-4 py-3">
+              <Image
+                src="/brand/bossos-wordmark-master.png"
+                alt="BossOS"
+                width={180}
+                height={120}
+                priority
+                className="h-auto w-[160px] sm:w-[180px]"
+              />
             </div>
+
+            <h1 className="mt-5 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Tech Login
+            </h1>
+            <p className="mt-3 max-w-md text-center text-sm leading-6 text-white/60 sm:mx-auto sm:text-[15px]">
+              Sign in to access field tools, logs, and daily division workflows.
+            </p>
           </div>
+
+          <form onSubmit={handleSubmit} className="grid gap-5 px-6 py-6 sm:px-8 sm:py-8">
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+              placeholder="Email"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/[0.07]"
+            />
+
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+              placeholder="Password"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/[0.07]"
+            />
+
+            {error ? (
+              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200">
+                {error}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-default disabled:opacity-70"
+            >
+              {submitting ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
