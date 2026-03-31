@@ -15,9 +15,6 @@ type FieldShellLayoutProps = {
 
 export default function FieldShellLayout({
   children,
-  kicker,
-  title,
-  subtitle,
 }: FieldShellLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -58,8 +55,8 @@ export default function FieldShellLayout({
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-[1600px] px-2 py-2 sm:px-5 sm:py-5">
-        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)] sm:rounded-[28px]">
+      <div className="mx-auto max-w-400 px-2 py-2 sm:px-5 sm:py-5">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#111111] shadow-[0_20px_80px_rgba(0,0,0,0.45)] sm:rounded-[28px]">
           <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="hidden h-[calc(100vh-16px)] min-h-0 border-r border-white/10 lg:block sm:h-[calc(100vh-40px)]">
               <FieldSidebar
@@ -74,7 +71,7 @@ export default function FieldShellLayout({
 
             <div className="min-w-0">
               <main className="min-w-0 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-                <div className="mx-auto w-full max-w-[1200px] min-w-0">
+                <div className="mx-auto w-full max-w-300 min-w-0">
                   {children}
                 </div>
               </main>
