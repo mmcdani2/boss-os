@@ -1,6 +1,17 @@
 {
-  "name": "field-cheat-sheets-realdb",
+  "name": "boss-os",
   "private": true,
   "version": "0.0.1",
-  "packageManager": "pnpm@10.0.0"
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:admin": "pnpm --dir apps/admin-web-next dev",
+    "dev:field": "pnpm --dir apps/field-web-next dev",
+    "dev:api": "pnpm --dir apps/api dev",
+    "build:admin": "pnpm --dir apps/admin-web-next build",
+    "build:field": "pnpm --dir apps/field-web-next build",
+    "build:api": "pnpm --dir apps/api build",
+    "db:generate": "pnpm --dir apps/api db:generate",
+    "db:migrate": "pnpm --dir apps/api db:migrate",
+    "db:seed-admin": "pnpm --dir apps/api db:seed-admin"
+  }
 }
