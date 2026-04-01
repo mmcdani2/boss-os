@@ -1,7 +1,7 @@
 ﻿import { Router } from "express";
 import { asc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { inventoryItems } from "../../db/schema.js";
+import { inventoryItemLocations, inventoryItems } from "../../db/schema.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/require-auth.js";
 
 const router = Router();
@@ -51,6 +51,72 @@ router.get("/", requireAuth, async (req: AuthedRequest, res) => {
     });
   } catch (error) {
     console.error("List inventory items error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.get("/:id/locations", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    if (!req.authUser) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    if (req.authUser.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
+    const id = String(req.params.id || "").trim();
+
+    if (!id) {
+      return res.status(400).json({ error: "Inventory item id is required." });
+    }
+
+    const itemRows = await db
+      .select({
+        id: inventoryItems.id,
+        storageLocation: inventoryItems.storageLocation,
+        quantityOnHand: inventoryItems.quantityOnHand,
+      })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, id))
+      .limit(1);
+
+    const item = itemRows[0];
+
+    if (!item) {
+      return res.status(404).json({ error: "Inventory item not found." });
+    }
+
+    const locationRows = await db
+      .select({
+        id: inventoryItemLocations.id,
+        locationName: inventoryItemLocations.locationName,
+        locationType: inventoryItemLocations.locationType,
+        quantity: inventoryItemLocations.quantity,
+      })
+      .from(inventoryItemLocations)
+      .where(eq(inventoryItemLocations.itemId, id))
+      .orderBy(
+        asc(inventoryItemLocations.locationType),
+        asc(inventoryItemLocations.locationName)
+      );
+
+    if (locationRows.length > 0) {
+      return res.json({ locations: locationRows });
+    }
+
+    return res.json({
+      locations: [
+        {
+          id: "legacy-storage-location",
+          locationName: item.storageLocation,
+          locationType: "warehouse",
+          quantity: item.quantityOnHand,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Get inventory item locations error:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
 });
@@ -129,6 +195,102 @@ router.post("/", requireAuth, async (req: AuthedRequest, res) => {
     return res.status(201).json({ item: inserted[0] });
   } catch (error) {
     console.error("Create inventory item error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.patch("/:id", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    if (!req.authUser) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    if (req.authUser.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    const name = String(req.body?.name || "").trim();
+    const sku = String(req.body?.sku || "").trim();
+    const category = String(req.body?.category || "").trim();
+    const unitOfMeasure = String(req.body?.unitOfMeasure || "").trim();
+    const quantityOnHand = Number(req.body?.quantityOnHand ?? 0);
+    const reorderThreshold = Number(req.body?.reorderThreshold ?? 0);
+    const storageLocation = String(req.body?.storageLocation || "").trim();
+    const notesRaw = String(req.body?.notes || "").trim();
+
+    if (!id) {
+      return res.status(400).json({ error: "Inventory item id is required." });
+    }
+
+    if (!name || !sku || !category || !unitOfMeasure || !storageLocation) {
+      return res.status(400).json({
+        error: "Name, SKU, category, unit of measure, and storage location are required.",
+      });
+    }
+
+    if (!Number.isInteger(quantityOnHand) || quantityOnHand < 0) {
+      return res.status(400).json({ error: "Quantity on hand must be a non-negative whole number." });
+    }
+
+    if (!Number.isInteger(reorderThreshold) || reorderThreshold < 0) {
+      return res.status(400).json({ error: "Reorder threshold must be a non-negative whole number." });
+    }
+
+    const existingItem = await db
+      .select({ id: inventoryItems.id })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, id))
+      .limit(1);
+
+    if (!existingItem[0]) {
+      return res.status(404).json({ error: "Inventory item not found." });
+    }
+
+    const duplicateSku = await db
+      .select({ id: inventoryItems.id })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.sku, sku))
+      .limit(10);
+
+    const conflicting = duplicateSku.find((row) => row.id !== id);
+
+    if (conflicting) {
+      return res.status(409).json({ error: "An inventory item with that SKU already exists." });
+    }
+
+    const updated = await db
+      .update(inventoryItems)
+      .set({
+        name,
+        sku,
+        category,
+        unitOfMeasure,
+        quantityOnHand,
+        reorderThreshold,
+        storageLocation,
+        notes: notesRaw || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(inventoryItems.id, id))
+      .returning({
+        id: inventoryItems.id,
+        name: inventoryItems.name,
+        sku: inventoryItems.sku,
+        category: inventoryItems.category,
+        unitOfMeasure: inventoryItems.unitOfMeasure,
+        quantityOnHand: inventoryItems.quantityOnHand,
+        reorderThreshold: inventoryItems.reorderThreshold,
+        storageLocation: inventoryItems.storageLocation,
+        notes: inventoryItems.notes,
+        isActive: inventoryItems.isActive,
+        createdAt: inventoryItems.createdAt,
+        updatedAt: inventoryItems.updatedAt,
+      });
+
+    return res.json({ item: updated[0] });
+  } catch (error) {
+    console.error("Update inventory item error:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
 });

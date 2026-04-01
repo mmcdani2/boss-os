@@ -282,6 +282,27 @@ export const inventoryItems = pgTable(
   })
 );
 
+
+export const inventoryItemLocations = pgTable(
+  "inventory_item_locations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id").notNull().references(() => inventoryItems.id),
+    locationName: varchar("location_name", { length: 255 }).notNull(),
+    locationType: varchar("location_type", { length: 50 }).notNull(),
+    quantity: integer("quantity").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    itemIdx: index("inventory_item_locations_item_idx").on(table.itemId),
+    itemLocationIdx: index("inventory_item_locations_item_location_idx").on(
+      table.itemId,
+      table.locationName
+    ),
+    locationTypeIdx: index("inventory_item_locations_location_type_idx").on(table.locationType),
+  })
+);
 export const inventoryTransactions = pgTable(
   "inventory_transactions",
   {
@@ -299,4 +320,5 @@ export const inventoryTransactions = pgTable(
     createdAtIdx: index("inventory_transactions_created_at_idx").on(table.createdAt),
   })
 );
+
 
