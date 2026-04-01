@@ -1,89 +1,46 @@
-# ðŸ§° BossOS
+# BossOS
 
-> *Operational software for the business behind Urban Mechanical and Urban Spray Foam.*
+BossOS is the operational software platform for the business behind Urban Mechanical and Urban Spray Foam. This monorepo contains the live admin app, live field app, and API that now power the post-migration system.
 
-BossOS is the internal monorepo for the live admin app, live field app, and API that now power the post-migration system.
+## Highlights
 
----
+- Live Next.js admin and field apps
+- Dedicated API service for auth, records, and data workflows
+- Clear separation between live apps and retained legacy Vite apps
+- Manual release flow documented for Vercel, Railway, Neon, and Drizzle
+- Root-level helper scripts for local development, builds, and database tasks
 
-## ðŸ“š Table of Contents
+## Repository structure
 
-- [ðŸŒŸ Highlights](#-highlights)
-- [â„¹ï¸ Overview](#â„¹ï¸-overview)
-- [ðŸ—‚ï¸ Repository Structure](#ï¸-repository-structure)
-- [ðŸš€ Quick Start](#-quick-start)
-- [ðŸ› ï¸ Core Commands](#ï¸-core-commands)
-- [ðŸ§­ Developer Workflow](#-developer-workflow)
-- [ðŸ“¦ Release Targets](#-release-targets)
-- [ðŸ“– Documentation Map](#-documentation-map)
-- [ðŸ§± Legacy Note](#-legacy-note)
+### Live apps
 
----
-
-## ðŸŒŸ Highlights
-
-- âœ… Live Next.js admin and field apps
-- âœ… Dedicated API service for auth, records, and operational workflows
-- âœ… Clear live-versus-legacy boundary after migration
-- âœ… Root-level helper scripts for local development, builds, and database tasks
-- âœ… Release and deployment workflow documented for Vercel, Railway, Neon, and Drizzle
-
----
-
-## â„¹ï¸ Overview
-
-BossOS is the operational platform for the business behind Urban Mechanical and Urban Spray Foam. The repository now centers on the migrated Next.js frontends and the API service, while the older Vite apps are retained only for controlled reference.
-
-The goal of this repo is straightforward: keep the live system stable, keep boundaries clear, and make normal development, testing, and release work easy to follow.
-
-<details>
-<summary><strong>Why this repo is structured this way</strong></summary>
-
-The migration is complete for the live admin and field apps, but legacy Vite apps are still retained for fallback reference and controlled cleanup. That means this repo has two responsibilities:
-
-1. support normal work in the live apps
-2. preserve enough legacy context to avoid reckless cleanup
-
-</details>
-
----
-
-## ðŸ—‚ï¸ Repository Structure
-
-### âœ… Live apps
-
-These are the active application surfaces and the only normal release targets:
+These are the active application surfaces and normal release targets:
 
 - `apps/admin-web-next`
 - `apps/field-web-next`
 - `apps/api`
 
-### ðŸ§± Legacy apps
+### Legacy apps
 
 These older Vite apps are retained for controlled reference only:
 
 - `apps/admin-web`
 - `apps/field-web`
 
-Do not build normal feature work in the legacy apps unless the task is explicitly about archival, migration comparison, or recovery.
+Do not build normal feature work in the legacy apps unless the task is specifically about archival, comparison, or recovery.
 
-<details>
-<summary><strong>Tech stack</strong></summary>
+## Tech stack
 
 - Next.js for the live admin and field frontends
 - React and TypeScript across the frontend apps
 - Express and TypeScript for the API
-- Vercel for frontend deployment
 - Railway for API deployment
+- Vercel for frontend deployment
 - Neon for hosted Postgres
 - Drizzle for schema and migration workflow
 - pnpm for workspace package management
 
-</details>
-
----
-
-## ðŸš€ Quick Start
+## Quick start
 
 ### 1. Install dependencies
 
@@ -101,7 +58,7 @@ Before running anything locally, make sure environment variables are set for:
 - `apps/field-web-next`
 - `apps/api`
 
-> Exact env filenames still need to be filled in from the real repo. Do not guess them.
+> Environment file names still need to be documented from the real repo. Do not guess them. Add the exact filenames once confirmed.
 
 ### 3. Start the system locally
 
@@ -111,22 +68,21 @@ Recommended startup order:
 2. Admin app
 3. Field app
 
+Run from repo root:
+
 ```bash
 pnpm dev:api
+```
+
+```bash
 pnpm dev:admin
+```
+
+```bash
 pnpm dev:field
 ```
 
-<details>
-<summary><strong>Why this startup order matters</strong></summary>
-
-Both frontends depend on the API for auth and data. Starting the backend first avoids fake frontend failures caused by a dead API.
-
-</details>
-
----
-
-## ðŸ› ï¸ Core Commands
+## Core commands
 
 ### Local development
 
@@ -152,78 +108,13 @@ pnpm db:migrate
 pnpm db:seed-admin
 ```
 
----
+## Developer workflow
 
-## ðŸ§­ Developer Workflow
+The full setup, branch flow, testing flow, merge flow, release flow, and deployment runbook live here:
 
-A new developer should follow this order:
+- `docs/DEVELOPER-RUNBOOK.md`
 
-1. install dependencies
-2. configure environment variables
-3. start the API first
-4. start the admin or field app
-5. switch to `development`
-6. pull latest `development`
-7. merge latest `main` into `development`
-8. make one controlled change
-9. run the correct build/test checks
-10. merge back to `main` after validation
-11. release the affected app
-
-The full branch, testing, merge, deployment, and database workflow lives in the runbook below.
-
----
-
-## ðŸ“¦ Release Targets
-
-- Admin frontend â†’ Vercel
-- Field frontend â†’ Vercel
-- API â†’ Railway
-- Database â†’ Neon
-- Schema and migrations â†’ Drizzle through the API workflow
-
-<details>
-<summary><strong>Versioning approach</strong></summary>
-
-Use semantic versioning:
-
-- patch = fixes and cleanup
-- minor = backward-compatible features
-- major = breaking changes
-
-Recommended pattern:
-
-- root `package.json` = repo milestone/version marker
-- app `package.json` = app release version
-
-</details>
-
----
-
-## ðŸ“– Documentation Map
-
-- Developer runbook: `docs/DEVELOPER-RUNBOOK.md`
-
-That runbook covers:
-
-- branch workflow
-- testing flow
-- merge flow
-- release flow
-- Vercel workflow
-- Railway workflow
-- Neon workflow
-- Drizzle workflow
-
----
-
-## ðŸ§± Legacy Note
-
-Legacy Vite apps remain in the repo for controlled reference only. Keep cleanup deliberate. Prefer archival or isolation over blind deletion when risk exists.
-
----
-
-## ðŸ¤ Working Rules
+## Working rules
 
 - Prefer `apps/admin-web-next` for admin UI work
 - Prefer `apps/field-web-next` for field UI work
@@ -231,3 +122,11 @@ Legacy Vite apps remain in the repo for controlled reference only. Keep cleanup 
 - Avoid touching legacy Vite apps unless the task is explicitly legacy-related
 - Keep changes narrow and controlled
 - Prefer one release concern at a time
+
+## Release targets
+
+- Admin frontend -> Vercel
+- Field frontend -> Vercel
+- API -> Railway
+- Database -> Neon
+- Schema/migrations -> Drizzle through the API workflow
