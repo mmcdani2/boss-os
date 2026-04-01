@@ -1,393 +1,132 @@
-# BossOS Monorepo
+# BossOS
 
-BossOS is the internal monorepo for the live admin app, live field app, and API.
+BossOS is the operational software platform for the business behind Urban Mechanical and Urban Spray Foam. This monorepo contains the live admin app, live field app, and API that now power the post-migration system.
 
-## 1. What is live
+## Highlights
 
-These are the active apps and the only normal release targets:
+- Live Next.js admin and field apps
+- Dedicated API service for auth, records, and data workflows
+- Clear separation between live apps and retained legacy Vite apps
+- Manual release flow documented for Vercel, Railway, Neon, and Drizzle
+- Root-level helper scripts for local development, builds, and database tasks
+
+## Repository structure
+
+### Live apps
+
+These are the active application surfaces and normal release targets:
 
 - `apps/admin-web-next`
 - `apps/field-web-next`
 - `apps/api`
 
-These older Vite apps are legacy only:
+### Legacy apps
+
+These older Vite apps are retained for controlled reference only:
 
 - `apps/admin-web`
 - `apps/field-web`
 
-Do not build new feature work in the legacy Vite apps unless the task is explicitly about legacy comparison, archival, or recovery.
+Do not build normal feature work in the legacy apps unless the task is specifically about archival, comparison, or recovery.
 
-## 2. First-day developer setup
+## Tech stack
 
-### Prerequisites
+- Next.js for the live admin and field frontends
+- React and TypeScript across the frontend apps
+- Express and TypeScript for the API
+- Railway for API deployment
+- Vercel for frontend deployment
+- Neon for hosted Postgres
+- Drizzle for schema and migration workflow
+- pnpm for workspace package management
 
-Install:
+## Quick start
 
-- Node.js
-- pnpm
-- Git
+### 1. Install dependencies
 
-### Install dependencies
-
-From repo root:
+From the repo root:
 
 ```bash
 pnpm install
 ```
 
-### Environment variables
+### 2. Configure environment variables
 
-Before running the apps, make sure the required environment variables are present for:
+Before running anything locally, make sure environment variables are set for:
 
 - `apps/admin-web-next`
 - `apps/field-web-next`
 - `apps/api`
 
-At minimum, verify the frontend apps point to the correct API base URL and the API points to the correct database and auth secrets.
+> Environment file names still need to be documented from the real repo. Do not guess them. Add the exact filenames once confirmed.
 
-## 3. Main commands from repo root
+### 3. Start the system locally
 
-### Run apps locally
+Recommended startup order:
 
-Admin app:
-```bash
-pnpm dev:admin
-```
+1. API
+2. Admin app
+3. Field app
 
-Field app:
-```bash
-pnpm dev:field
-```
+Run from repo root:
 
-API:
 ```bash
 pnpm dev:api
 ```
 
-### Build apps locally
-
-Admin app:
 ```bash
-pnpm build:admin
+pnpm dev:admin
 ```
 
-Field app:
 ```bash
+pnpm dev:field
+```
+
+## Core commands
+
+### Local development
+
+```bash
+pnpm dev:api
+pnpm dev:admin
+pnpm dev:field
+```
+
+### Production builds
+
+```bash
+pnpm build:api
+pnpm build:admin
 pnpm build:field
 ```
 
-API:
-```bash
-pnpm build:api
-```
+### Database tasks
 
-### Database commands
-
-Generate a Drizzle migration:
 ```bash
 pnpm db:generate
-```
-
-Apply a Drizzle migration:
-```bash
 pnpm db:migrate
-```
-
-Seed the admin user:
-```bash
 pnpm db:seed-admin
 ```
 
-## 4. Branch workflow
+## Developer workflow
 
-### Starting work
+The full setup, branch flow, testing flow, merge flow, release flow, and deployment runbook live here:
 
-Fetch the latest remote state:
+- `docs/DEVELOPER-RUNBOOK.md`
 
-```bash
-git fetch origin --prune
-```
+## Working rules
 
-Switch to development:
+- Prefer `apps/admin-web-next` for admin UI work
+- Prefer `apps/field-web-next` for field UI work
+- Prefer `apps/api` for backend, data, and schema work
+- Avoid touching legacy Vite apps unless the task is explicitly legacy-related
+- Keep changes narrow and controlled
+- Prefer one release concern at a time
 
-```bash
-git switch development
-```
+## Release targets
 
-If your local `development` branch does not exist yet:
-
-```bash
-git switch -c development --track origin/development
-```
-
-Pull the latest `development` branch:
-
-```bash
-git pull origin development
-```
-
-### Keep development current with main
-
-Before or during active work, make sure `development` contains the latest `main`:
-
-```bash
-git fetch origin --prune
-git switch development
-git pull origin development
-git merge origin/main
-```
-
-Push the updated development branch if needed:
-
-```bash
-git push origin development
-```
-
-## 5. Normal development flow
-
-1. Start from `development`
-2. Make one controlled change at a time
-3. Prefer the live apps:
-   - `apps/admin-web-next`
-   - `apps/field-web-next`
-   - `apps/api`
-4. Avoid touching legacy apps unless the task is specifically legacy-related
-5. Run the local checks for the app you changed
-6. Commit narrow, reviewable changes
-
-## 6. Testing before merge
-
-### Frontend checks
-
-If you changed the admin app:
-
-```bash
-pnpm build:admin
-```
-
-If you changed the field app:
-
-```bash
-pnpm build:field
-```
-
-### API checks
-
-If you changed the API:
-
-```bash
-pnpm build:api
-```
-
-If you changed schema/data access code, also verify:
-
-- the API still boots cleanly
-- the database connection still works
-- auth/login still works
-- the affected endpoint or workflow still works
-
-### Manual smoke testing
-
-Admin app:
-- login works
-- protected routes load
-- dashboard renders
-- shell/navigation renders correctly
-
-Field app:
-- login works
-- protected routes load
-- shell/navigation renders correctly
-- changed workflow works on desktop and mobile viewport
-
-API:
-- service boots
-- auth path works
-- a known protected flow still works
-- changed endpoints behave correctly
-
-## 7. Merge flow back to main
-
-After testing is complete and `development` is ready, merge back into `main`.
-
-Fetch latest remote state:
-
-```bash
-git fetch origin --prune
-```
-
-Update `development` one more time if needed:
-
-```bash
-git switch development
-git pull origin development
-git merge origin/main
-```
-
-Switch to main:
-
-```bash
-git switch main
-```
-
-Pull latest main:
-
-```bash
-git pull origin main
-```
-
-Merge development into main:
-
-```bash
-git merge development
-```
-
-Push main:
-
-```bash
-git push origin main
-```
-
-## 8. Release workflow
-
-BossOS uses a simple manual release process.
-
-### What to version
-
-Use semantic versioning:
-
-- patch = fixes, cleanup, non-breaking small improvements
-- minor = new backward-compatible features
-- major = breaking changes
-
-Recommended pattern:
-
-- root `package.json` = repo milestone/version marker
-- app `package.json` = app release version
-
-### Normal release steps
-
-1. Confirm the app that changed
-2. Run the build/test checks
-3. Bump the version for the app being released
-4. Optionally bump the root repo version
-5. Commit the version change
-6. Merge tested work into `main`
-7. Push `main`
-8. Confirm deployment on the correct platform
-9. Smoke test production
-
-### Example release commit messages
-
-- `chore(release): bump admin-web-next to 0.0.2`
-- `chore(release): bump field-web-next to 0.0.2`
-- `chore(release): bump api to 0.0.2`
-- `chore(release): bump boss-os repo to 0.0.2`
-
-## 9. Deployment runbook
-
-### Vercel
-
-Vercel is for the live Next frontends only:
-
-- `apps/admin-web-next`
-- `apps/field-web-next`
-
-#### Frontend deploy flow
-
-1. Confirm the correct frontend app changed
-2. Run the local build
-3. Bump version if this is a real release
-4. Commit and push to the branch used by the connected Vercel project
-5. Open Vercel and verify the correct project deployed
-6. Verify the project root directory is correct:
-   - admin -> `apps/admin-web-next`
-   - field -> `apps/field-web-next`
-7. Verify required environment variables are present
-8. Open the live site and smoke test
-
-### Railway
-
-Railway is for the backend service:
-
-- `apps/api`
-
-#### API deploy flow
-
-1. Confirm the change is in `apps/api`
-2. Run the local API verification flow
-3. Bump version if this is a real release
-4. Commit and push to the branch connected to Railway
-5. Open Railway and verify the correct service deployed
-6. Verify environment variables and secrets are present
-7. Verify the database connection settings are correct
-8. Check deploy logs for startup or runtime failures
-9. Hit a known-good API path or run your normal auth/API smoke test
-
-## 10. Database workflow
-
-### Neon
-
-Neon is the hosted Postgres source of truth.
-
-Use Neon for:
-
-- managed Postgres hosting
-- environment-specific database instances
-- connection strings used by the API
-
-Operational rules:
-
-- do not make casual schema edits directly in Neon
-- verify the exact environment before doing anything risky
-- treat production Neon as controlled infrastructure
-
-### Drizzle
-
-Drizzle is the schema and migration workflow layer.
-
-Use Drizzle for:
-
-- schema definition in code
-- migration generation
-- migration review
-- migration application
-
-### Recommended schema change flow
-
-1. Change schema in code under the API
-2. Generate the migration:
-   ```bash
-   pnpm db:generate
-   ```
-3. Review the migration SQL carefully
-4. Confirm the target database/environment
-5. Apply the migration:
-   ```bash
-   pnpm db:migrate
-   ```
-6. Verify the API still boots and the affected flow still works
-7. Seed admin if needed:
-   ```bash
-   pnpm db:seed-admin
-   ```
-
-### Database safety checklist
-
-Before running schema work, verify:
-
-- correct Neon project
-- correct database/environment
-- correct connection string
-- whether the migration is destructive
-- whether backfill or seed work is needed
-- whether the frontend and API expect the old shape
-
-## 11. Operational guardrails
-
-- Do not release legacy Vite apps by accident
-- Do not make broad changes when a narrow change will do
-- Do not mix unrelated schema work with unrelated frontend cleanup
-- Do not assume Vercel, Railway, or Neon settings are correct after repo or branch changes
-- Prefer one controlled change at a time
-- Prefer one controlled release at a time
+- Admin frontend -> Vercel
+- Field frontend -> Vercel
+- API -> Railway
+- Database -> Neon
+- Schema/migrations -> Drizzle through the API workflow
