@@ -1,4 +1,23 @@
-# ðŸ§° BossOS
+$ErrorActionPreference = "Stop"
+
+function Write-Utf8NoBom {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Content
+  )
+
+  $fullPath = Join-Path (Get-Location).Path $Path
+  $dir = Split-Path $fullPath -Parent
+  if ($dir -and -not (Test-Path $dir)) {
+    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+  }
+
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($fullPath, $Content, $utf8NoBom)
+}
+
+$readme = @'
+# 🧰 BossOS
 
 > *Operational software for the business behind Urban Mechanical and Urban Spray Foam.*
 
@@ -6,31 +25,31 @@ BossOS is the internal monorepo for the live admin app, live field app, and API 
 
 ---
 
-## ðŸ“š Table of Contents
+## 📚 Table of Contents
 
-- [ðŸŒŸ Highlights](#-highlights)
-- [â„¹ï¸ Overview](#â„¹ï¸-overview)
-- [ðŸ—‚ï¸ Repository Structure](#ï¸-repository-structure)
-- [ðŸš€ Quick Start](#-quick-start)
-- [ðŸ› ï¸ Core Commands](#ï¸-core-commands)
-- [ðŸ§­ Developer Workflow](#-developer-workflow)
-- [ðŸ“¦ Release Targets](#-release-targets)
-- [ðŸ“– Documentation Map](#-documentation-map)
-- [ðŸ§± Legacy Note](#-legacy-note)
-
----
-
-## ðŸŒŸ Highlights
-
-- âœ… Live Next.js admin and field apps
-- âœ… Dedicated API service for auth, records, and operational workflows
-- âœ… Clear live-versus-legacy boundary after migration
-- âœ… Root-level helper scripts for local development, builds, and database tasks
-- âœ… Release and deployment workflow documented for Vercel, Railway, Neon, and Drizzle
+- [🌟 Highlights](#-highlights)
+- [ℹ️ Overview](#ℹ️-overview)
+- [🗂️ Repository Structure](#️-repository-structure)
+- [🚀 Quick Start](#-quick-start)
+- [🛠️ Core Commands](#️-core-commands)
+- [🧭 Developer Workflow](#-developer-workflow)
+- [📦 Release Targets](#-release-targets)
+- [📖 Documentation Map](#-documentation-map)
+- [🧱 Legacy Note](#-legacy-note)
 
 ---
 
-## â„¹ï¸ Overview
+## 🌟 Highlights
+
+- ✅ Live Next.js admin and field apps
+- ✅ Dedicated API service for auth, records, and operational workflows
+- ✅ Clear live-versus-legacy boundary after migration
+- ✅ Root-level helper scripts for local development, builds, and database tasks
+- ✅ Release and deployment workflow documented for Vercel, Railway, Neon, and Drizzle
+
+---
+
+## ℹ️ Overview
 
 BossOS is the operational platform for the business behind Urban Mechanical and Urban Spray Foam. The repository now centers on the migrated Next.js frontends and the API service, while the older Vite apps are retained only for controlled reference.
 
@@ -48,9 +67,9 @@ The migration is complete for the live admin and field apps, but legacy Vite app
 
 ---
 
-## ðŸ—‚ï¸ Repository Structure
+## 🗂️ Repository Structure
 
-### âœ… Live apps
+### ✅ Live apps
 
 These are the active application surfaces and the only normal release targets:
 
@@ -58,7 +77,7 @@ These are the active application surfaces and the only normal release targets:
 - `apps/field-web-next`
 - `apps/api`
 
-### ðŸ§± Legacy apps
+### 🧱 Legacy apps
 
 These older Vite apps are retained for controlled reference only:
 
@@ -83,7 +102,7 @@ Do not build normal feature work in the legacy apps unless the task is explicitl
 
 ---
 
-## ðŸš€ Quick Start
+## 🚀 Quick Start
 
 ### 1. Install dependencies
 
@@ -126,7 +145,7 @@ Both frontends depend on the API for auth and data. Starting the backend first a
 
 ---
 
-## ðŸ› ï¸ Core Commands
+## 🛠️ Core Commands
 
 ### Local development
 
@@ -154,7 +173,7 @@ pnpm db:seed-admin
 
 ---
 
-## ðŸ§­ Developer Workflow
+## 🧭 Developer Workflow
 
 A new developer should follow this order:
 
@@ -174,13 +193,13 @@ The full branch, testing, merge, deployment, and database workflow lives in the 
 
 ---
 
-## ðŸ“¦ Release Targets
+## 📦 Release Targets
 
-- Admin frontend â†’ Vercel
-- Field frontend â†’ Vercel
-- API â†’ Railway
-- Database â†’ Neon
-- Schema and migrations â†’ Drizzle through the API workflow
+- Admin frontend → Vercel
+- Field frontend → Vercel
+- API → Railway
+- Database → Neon
+- Schema and migrations → Drizzle through the API workflow
 
 <details>
 <summary><strong>Versioning approach</strong></summary>
@@ -200,7 +219,7 @@ Recommended pattern:
 
 ---
 
-## ðŸ“– Documentation Map
+## 📖 Documentation Map
 
 - Developer runbook: `docs/DEVELOPER-RUNBOOK.md`
 
@@ -217,13 +236,13 @@ That runbook covers:
 
 ---
 
-## ðŸ§± Legacy Note
+## 🧱 Legacy Note
 
 Legacy Vite apps remain in the repo for controlled reference only. Keep cleanup deliberate. Prefer archival or isolation over blind deletion when risk exists.
 
 ---
 
-## ðŸ¤ Working Rules
+## 🤝 Working Rules
 
 - Prefer `apps/admin-web-next` for admin UI work
 - Prefer `apps/field-web-next` for field UI work
@@ -231,3 +250,8 @@ Legacy Vite apps remain in the repo for controlled reference only. Keep cleanup 
 - Avoid touching legacy Vite apps unless the task is explicitly legacy-related
 - Keep changes narrow and controlled
 - Prefer one release concern at a time
+'@
+
+Write-Utf8NoBom -Path "README.md" -Content $readme
+
+Write-Host "Updated README.md with a polished template-style front door"
