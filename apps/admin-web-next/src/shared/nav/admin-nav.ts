@@ -20,6 +20,11 @@ export const adminNavItems: AdminNavItem[] = [
       pathname === "/divisions" || pathname.startsWith("/divisions/"),
   },
   {
+    label: "Inventory",
+    to: "/inventory",
+    match: (pathname) => pathname === "/inventory" || pathname.startsWith("/inventory/"),
+  },
+  {
     label: "Users",
     to: "/users",
     match: (pathname) => pathname === "/users",

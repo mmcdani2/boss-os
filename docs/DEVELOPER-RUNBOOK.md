@@ -27,10 +27,10 @@ These are the active apps and normal release targets:
 
 These are legacy-only reference apps:
 
-- `apps/admin-web`
-- `apps/field-web`
+- `archive/apps/admin-web`
+- `archive/apps/field-web`
 
-Do not treat them as active release targets.
+Do not treat them as active release targets. They now live under `archive/apps/` and are retained for controlled reference only.
 
 ## 3. Prerequisites
 
@@ -69,9 +69,9 @@ The exact local env file names were not provided in the repo review inputs. Add 
 
 Suggested section to complete later:
 
-- admin app env filename: `TODO`
-- field app env filename: `TODO`
-- api env filename: `TODO`
+- admin app env filename: `.env.local`
+- field app env filename: `.env.local`
+- api env filename: `.env.local`
 
 ## 6. Root commands
 

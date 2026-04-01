@@ -258,3 +258,45 @@ export const sprayFoamMaterialLines = pgTable(
     ),
   })
 );
+
+export const inventoryItems = pgTable(
+  "inventory_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    sku: varchar("sku", { length: 120 }).notNull(),
+    category: varchar("category", { length: 120 }).notNull(),
+    unitOfMeasure: varchar("unit_of_measure", { length: 60 }).notNull(),
+    quantityOnHand: integer("quantity_on_hand").notNull().default(0),
+    reorderThreshold: integer("reorder_threshold").notNull().default(0),
+    storageLocation: varchar("storage_location", { length: 255 }).notNull(),
+    notes: text("notes"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    skuIdx: uniqueIndex("inventory_items_sku_idx").on(table.sku),
+    categoryIdx: index("inventory_items_category_idx").on(table.category),
+    activeIdx: index("inventory_items_active_idx").on(table.isActive),
+  })
+);
+
+export const inventoryTransactions = pgTable(
+  "inventory_transactions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id").notNull().references(() => inventoryItems.id),
+    transactionType: varchar("transaction_type", { length: 50 }).notNull(),
+    quantityDelta: integer("quantity_delta").notNull(),
+    reason: text("reason").notNull(),
+    performedByUserId: uuid("performed_by_user_id").notNull().references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    itemIdx: index("inventory_transactions_item_idx").on(table.itemId),
+    userIdx: index("inventory_transactions_user_idx").on(table.performedByUserId),
+    createdAtIdx: index("inventory_transactions_created_at_idx").on(table.createdAt),
+  })
+);
+

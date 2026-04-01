@@ -24,10 +24,10 @@ These are the active application surfaces and normal release targets:
 
 These older Vite apps are retained for controlled reference only:
 
-- `apps/admin-web`
-- `apps/field-web`
+- `archive/apps/admin-web`
+- `archive/apps/field-web`
 
-Do not build normal feature work in the legacy apps unless the task is specifically about archival, comparison, or recovery.
+Do not build normal feature work in the archived legacy apps unless the task is explicitly about archival, migration comparison, or recovery.
 
 ## Tech stack
 

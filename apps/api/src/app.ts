@@ -9,6 +9,7 @@ import companyRoutes from "./routes/company/index.js";
 import divisionRoutes from "./routes/divisions/index.js";
 import fieldConfigRoutes from "./routes/field-config/index.js";
 import userRoutes from "./routes/users/index.js";
+import inventoryRoutes from "./routes/inventory/index.js";
 
 export const app = express();
 
@@ -33,4 +34,6 @@ app.use("/api/company", companyRoutes);
 app.use("/api/divisions", divisionRoutes);
 app.use("/api/field-config", fieldConfigRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/inventory", inventoryRoutes);
+
 
