@@ -1,7 +1,7 @@
-﻿import { Router } from "express";
-import { asc, eq } from "drizzle-orm";
+import { Router } from "express";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { inventoryItemLocations, inventoryItems } from "../../db/schema.js";
+import { inventoryItemLocations, inventoryItems, inventoryTransactions, users } from "../../db/schema.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/require-auth.js";
 
 const router = Router();
@@ -121,6 +121,54 @@ router.get("/:id/locations", requireAuth, async (req: AuthedRequest, res) => {
   }
 });
 
+
+router.get("/:id/history", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    if (!req.authUser) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    if (req.authUser.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
+    const id = String(req.params.id || "").trim();
+
+    if (!id) {
+      return res.status(400).json({ error: "Inventory item id is required." });
+    }
+
+    const itemRows = await db
+      .select({ id: inventoryItems.id })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, id))
+      .limit(1);
+
+    if (!itemRows[0]) {
+      return res.status(404).json({ error: "Inventory item not found." });
+    }
+
+    const historyRows = await db
+      .select({
+        id: inventoryTransactions.id,
+        transactionType: inventoryTransactions.transactionType,
+        quantityDelta: inventoryTransactions.quantityDelta,
+        reason: inventoryTransactions.reason,
+        performedByName: users.fullName,
+        performedByEmail: users.email,
+        createdAt: inventoryTransactions.createdAt,
+      })
+      .from(inventoryTransactions)
+      .leftJoin(users, eq(inventoryTransactions.performedByUserId, users.id))
+      .where(eq(inventoryTransactions.itemId, id))
+      .orderBy(desc(inventoryTransactions.createdAt));
+
+    return res.json({ history: historyRows });
+  } catch (error) {
+    console.error("Get inventory item history error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
 router.post("/", requireAuth, async (req: AuthedRequest, res) => {
   try {
     if (!req.authUser) {

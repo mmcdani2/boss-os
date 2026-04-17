@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { apiFetch, apiJson } from '@/lib/api/client'
+import { MapPinned, Pencil, Clock3 } from 'lucide-react'
 
 type InventoryItem = {
   id: string
@@ -37,6 +38,21 @@ type InventoryResponse = {
 type InventoryLocationsResponse = {
   locations: InventoryLocation[]
 }
+
+type InventoryHistoryEntry = {
+  id: string
+  transactionType: string
+  quantityDelta: number
+  reason: string
+  performedByName: string | null
+  performedByEmail: string | null
+  createdAt: string
+}
+
+type InventoryHistoryResponse = {
+  history: InventoryHistoryEntry[]
+}
+
 
 type SortOption = 'name-asc' | 'name-desc' | 'qty-asc' | 'qty-desc'
 
@@ -209,11 +225,13 @@ function TextArea (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
 function InventoryRow ({
   item,
   onEdit,
-  onViewLocations
+  onViewLocations,
+  onViewHistory
 }: {
   item: InventoryItem
   onEdit: (item: InventoryItem) => void
   onViewLocations: (item: InventoryItem) => void
+  onViewHistory: (item: InventoryItem) => void
 }) {
   const lowStock = item.quantityOnHand <= item.reorderThreshold
 
@@ -259,15 +277,39 @@ function InventoryRow ({
 
       <div className='text-sm lg:text-center'>
         <div className='mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden'>
-          Locations
+          Actions
         </div>
-        <button
-          type='button'
-          onClick={() => onViewLocations(item)}
-          className='inline-flex max-w-full items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
-        >
-          <span className='truncate'>View Locations</span>
-        </button>
+        <div className='inline-flex w-fit rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.22)]'>
+          <button
+            type='button'
+            title='Edit Item'
+            aria-label='Edit Item'
+            onClick={() => onEdit(item)}
+            className='inline-flex h-9 w-9 items-center justify-center rounded-l-xl border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
+          >
+            <Pencil className='h-[15px] w-[15px]' />
+          </button>
+
+          <button
+            type='button'
+            title='View Locations'
+            aria-label='View Locations'
+            onClick={() => onViewLocations(item)}
+            className='-ml-px inline-flex h-9 w-9 items-center justify-center border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
+          >
+            <MapPinned className='h-[15px] w-[15px]' />
+          </button>
+
+          <button
+            type='button'
+            title='View History'
+            aria-label='View History'
+            onClick={() => onViewHistory(item)}
+            className='-ml-px inline-flex h-9 w-9 items-center justify-center rounded-r-xl border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
+          >
+            <Clock3 className='h-[15px] w-[15px]' />
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -291,6 +333,11 @@ export default function InventoryPage () {
   const [locationsLoading, setLocationsLoading] = useState(false)
   const [locationsError, setLocationsError] = useState('')
 
+  const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null)
+  const [history, setHistory] = useState<InventoryHistoryEntry[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState('')
+
   const [name, setName] = useState('')
   const [sku, setSku] = useState('')
   const [category, setCategory] = useState('')
@@ -308,6 +355,7 @@ export default function InventoryPage () {
 
   const showItemModal = showCreateModal || editingItem !== null
   const showLocationsModal = locationsItem !== null
+  const showHistoryModal = historyItem !== null
 
   const categoryOptions = useMemo(() => {
     return Array.from(new Set(items.map(item => item.category))).sort((a, b) =>
@@ -434,6 +482,34 @@ export default function InventoryPage () {
     setLocationsItem(null)
     setLocations([])
     setLocationsError('')
+  }
+
+  async function openHistoryModal (item: InventoryItem) {
+    try {
+      setHistoryItem(item)
+      setHistory([])
+      setHistoryError('')
+      setHistoryLoading(true)
+
+      const data = await apiJson<InventoryHistoryResponse>(
+        `/api/inventory/${item.id}/history`
+      )
+
+      setHistory(data.history)
+    } catch (err) {
+      setHistoryError(
+        err instanceof Error ? err.message : 'Failed to load item history.'
+      )
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  function closeHistoryModal () {
+    if (historyLoading) return
+    setHistoryItem(null)
+    setHistory([])
+    setHistoryError('')
   }
 
   async function handleSubmitItem (e: React.FormEvent) {
@@ -596,7 +672,7 @@ export default function InventoryPage () {
                   <div>Item</div>
                   <div className='text-center'>Category</div>
                   <div className='text-center'>On Hand</div>
-                  <div className='text-center'>Locations</div>
+                  <div className='text-center'>Actions</div>
                 </div>
 
                 <div className='min-h-0 flex-1 overflow-y-auto'>
@@ -606,6 +682,7 @@ export default function InventoryPage () {
                       item={item}
                       onEdit={openEditModal}
                       onViewLocations={item => void openLocationsModal(item)}
+                      onViewHistory={item => void openHistoryModal(item)}
                     />
                   ))}
                 </div>
@@ -683,6 +760,86 @@ export default function InventoryPage () {
                   type='button'
                   onClick={closeLocationsModal}
                   disabled={locationsLoading}
+                  className='inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showHistoryModal ? (
+        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-4 sm:items-center sm:py-6'>
+          <button
+            type='button'
+            aria-label='Close inventory history modal'
+            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
+            onClick={closeHistoryModal}
+          />
+          <div className='relative z-10 flex w-full max-w-3xl max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#171717] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:max-h-[90vh]'>
+            <div className='border-b border-white/10 px-6 py-6'>
+              <SectionKicker>Inventory</SectionKicker>
+              <h3 className='mt-3 text-2xl font-bold text-white'>
+                {historyItem?.name}
+              </h3>
+              <p className='mt-2 text-sm leading-6 text-white/60'>
+                Stock movement history for this item.
+              </p>
+            </div>
+
+            <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6'>
+              {historyLoading ? (
+                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/70'>
+                  Loading history...
+                </div>
+              ) : historyError ? (
+                <div className='rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-4 text-sm text-red-200'>
+                  {historyError}
+                </div>
+              ) : history.length === 0 ? (
+                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/60'>
+                  No history found for this item.
+                </div>
+              ) : (
+                <div className='overflow-hidden rounded-2xl border border-white/10'>
+                  <div className='grid grid-cols-[140px_120px_minmax(0,1fr)_160px] gap-4 border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35'>
+                    <div>Date</div>
+                    <div className='text-center'>Change</div>
+                    <div>Reason</div>
+                    <div>User</div>
+                  </div>
+
+                  {history.map(entry => (
+                    <div
+                      key={entry.id}
+                      className='grid grid-cols-[140px_120px_minmax(0,1fr)_160px] gap-4 border-t border-white/10 px-4 py-3 first:border-t-0'
+                    >
+                      <div className='text-sm text-white/75'>
+                        {new Date(entry.createdAt).toLocaleDateString()}
+                      </div>
+                      <div className='text-center text-sm font-semibold text-white'>
+                        {entry.quantityDelta > 0 ? '+' : ''}{entry.quantityDelta}
+                      </div>
+                      <div className='min-w-0 truncate text-sm text-white'>
+                        {entry.reason || '—'}
+                      </div>
+                      <div className='min-w-0 truncate text-sm text-white/75'>
+                        {entry.performedByName || entry.performedByEmail || '—'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className='border-t border-white/10 px-6 py-5'>
+              <div className='flex justify-end'>
+                <button
+                  type='button'
+                  onClick={closeHistoryModal}
+                  disabled={historyLoading}
                   className='inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60'
                 >
                   Close
