@@ -343,4 +343,121 @@ router.patch("/:id", requireAuth, async (req: AuthedRequest, res) => {
   }
 });
 
+router.post("/:id/adjust-stock", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    if (!req.authUser) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    if (req.authUser.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    const locationId = String(req.body?.locationId || "").trim();
+    const newQuantity = Number(req.body?.newQuantity);
+    const reason = String(req.body?.reason || "").trim();
+
+    if (!id) {
+      return res.status(400).json({ error: "Inventory item id is required." });
+    }
+
+    if (!locationId) {
+      return res.status(400).json({ error: "Location id is required." });
+    }
+
+    if (!Number.isInteger(newQuantity) || newQuantity < 0) {
+      return res.status(400).json({ error: "New quantity must be a non-negative whole number." });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ error: "Reason is required." });
+    }
+
+    const itemRows = await db
+      .select({
+        id: inventoryItems.id,
+        quantityOnHand: inventoryItems.quantityOnHand,
+        storageLocation: inventoryItems.storageLocation,
+      })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, id))
+      .limit(1);
+
+    const item = itemRows[0];
+
+    if (!item) {
+      return res.status(404).json({ error: "Inventory item not found." });
+    }
+
+    let quantityDelta = 0;
+
+    if (locationId === "legacy-storage-location") {
+      quantityDelta = newQuantity - item.quantityOnHand;
+
+      await db
+        .update(inventoryItems)
+        .set({
+          quantityOnHand: newQuantity,
+          updatedAt: new Date(),
+        })
+        .where(eq(inventoryItems.id, id));
+    } else {
+      const locationRows = await db
+        .select({
+          id: inventoryItemLocations.id,
+          quantity: inventoryItemLocations.quantity,
+        })
+        .from(inventoryItemLocations)
+        .where(eq(inventoryItemLocations.id, locationId))
+        .limit(1);
+
+      const location = locationRows[0];
+
+      if (!location) {
+        return res.status(404).json({ error: "Inventory location not found." });
+      }
+
+      quantityDelta = newQuantity - location.quantity;
+
+      await db
+        .update(inventoryItemLocations)
+        .set({
+          quantity: newQuantity,
+          updatedAt: new Date(),
+        })
+        .where(eq(inventoryItemLocations.id, locationId));
+
+      const locationTotals = await db
+        .select({
+          quantity: inventoryItemLocations.quantity,
+        })
+        .from(inventoryItemLocations)
+        .where(eq(inventoryItemLocations.itemId, id));
+
+      const totalQuantity = locationTotals.reduce((sum, row) => sum + row.quantity, 0);
+
+      await db
+        .update(inventoryItems)
+        .set({
+          quantityOnHand: totalQuantity,
+          updatedAt: new Date(),
+        })
+        .where(eq(inventoryItems.id, id));
+    }
+
+    await db.insert(inventoryTransactions).values({
+      itemId: id,
+      transactionType: "adjust",
+      quantityDelta,
+      reason,
+      performedByUserId: req.authUser.id,
+    });
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Adjust inventory stock error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
 export default router;

@@ -1,6 +1,0 @@
-﻿LEGACY APP
-
-This Vite admin app is legacy.
-Active migration target and current working app: apps/admin-web-next
-
-Do not add new features here unless explicitly needed for fallback or migration comparison.

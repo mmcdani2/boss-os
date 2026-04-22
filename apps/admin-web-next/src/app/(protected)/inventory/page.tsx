@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { apiFetch, apiJson } from '@/lib/api/client'
-import { MapPinned, Pencil, Clock3 } from 'lucide-react'
+import InventoryRow from './_components/InventoryRow'
+import LocationsModal from './_components/LocationsModal'
 
 type InventoryItem = {
   id: string
@@ -85,7 +86,7 @@ function Card ({
 
 function StatTile ({
   label,
-  value = '—'
+  value = 'Ã¢â‚¬â€'
 }: {
   label: string
   value?: string | number
@@ -222,98 +223,6 @@ function TextArea (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   )
 }
 
-function InventoryRow ({
-  item,
-  onEdit,
-  onViewLocations,
-  onViewHistory
-}: {
-  item: InventoryItem
-  onEdit: (item: InventoryItem) => void
-  onViewLocations: (item: InventoryItem) => void
-  onViewHistory: (item: InventoryItem) => void
-}) {
-  const lowStock = item.quantityOnHand <= item.reorderThreshold
-
-  return (
-    <div className='grid w-full gap-4 border-t border-white/10 px-5 py-4 transition hover:bg-white/[0.03] first:border-t-0 lg:grid-cols-[minmax(0,1.4fr)_160px_140px_140px] lg:items-center lg:gap-5'>
-      <div className='min-w-0'>
-        <button
-          type='button'
-          onClick={() => onEdit(item)}
-          className='min-w-0 text-left'
-        >
-          <div className='truncate text-[15px] font-semibold text-white transition hover:text-orange-300'>
-            {item.name}
-          </div>
-          <div className='mt-1 truncate text-sm text-white/50'>{item.sku}</div>
-        </button>
-      </div>
-
-      <div className='text-sm text-white/75 lg:text-center'>
-        <div className='mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden'>
-          Category
-        </div>
-        <span className='inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/75'>
-          {item.category}
-        </span>
-      </div>
-
-      <div className='lg:text-center'>
-        <div className='mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden'>
-          On Hand
-        </div>
-        <span
-          className={[
-            'inline-flex rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide',
-            lowStock
-              ? 'bg-amber-500/15 text-amber-300'
-              : 'bg-white/10 text-white/75'
-          ].join(' ')}
-        >
-          {item.quantityOnHand} {item.unitOfMeasure}
-        </span>
-      </div>
-
-      <div className='text-sm lg:text-center'>
-        <div className='mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35 lg:hidden'>
-          Actions
-        </div>
-        <div className='inline-flex w-fit rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.22)]'>
-          <button
-            type='button'
-            title='Edit Item'
-            aria-label='Edit Item'
-            onClick={() => onEdit(item)}
-            className='inline-flex h-9 w-9 items-center justify-center rounded-l-xl border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
-          >
-            <Pencil className='h-[15px] w-[15px]' />
-          </button>
-
-          <button
-            type='button'
-            title='View Locations'
-            aria-label='View Locations'
-            onClick={() => onViewLocations(item)}
-            className='-ml-px inline-flex h-9 w-9 items-center justify-center border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
-          >
-            <MapPinned className='h-[15px] w-[15px]' />
-          </button>
-
-          <button
-            type='button'
-            title='View History'
-            aria-label='View History'
-            onClick={() => onViewHistory(item)}
-            className='-ml-px inline-flex h-9 w-9 items-center justify-center rounded-r-xl border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-orange-200'
-          >
-            <Clock3 className='h-[15px] w-[15px]' />
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function InventoryPage () {
   const [items, setItems] = useState<InventoryItem[]>([])
@@ -691,83 +600,14 @@ export default function InventoryPage () {
           </Card>
         </div>
       </div>
-
       {showLocationsModal ? (
-        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-4 sm:items-center sm:py-6'>
-          <button
-            type='button'
-            aria-label='Close item locations modal'
-            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
-            onClick={closeLocationsModal}
-          />
-          <div className='relative z-10 flex w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#171717] shadow-[0_30px_100px_rgba(0,0,0,0.6)]'>
-            <div className='border-b border-white/10 px-6 py-6'>
-              <SectionKicker>Locations</SectionKicker>
-              <h3 className='mt-3 text-2xl font-bold text-white'>
-                {locationsItem?.name}
-              </h3>
-              <p className='mt-2 text-sm leading-6 text-white/60'>
-                Quantity by storage location for this item.
-              </p>
-            </div>
-
-            <div className='px-6 py-6'>
-              {locationsLoading ? (
-                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/70'>
-                  Loading locations...
-                </div>
-              ) : locationsError ? (
-                <div className='rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-4 text-sm text-red-200'>
-                  {locationsError}
-                </div>
-              ) : locations.length === 0 ? (
-                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/60'>
-                  No locations found for this item.
-                </div>
-              ) : (
-                <div className='overflow-hidden rounded-2xl border border-white/10'>
-                  <div className='grid grid-cols-[minmax(0,1.4fr)_120px_100px] gap-4 border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35'>
-                    <div>Location</div>
-                    <div className='text-center'>Type</div>
-                    <div className='text-center'>Qty</div>
-                  </div>
-
-                  {locations.map(location => (
-                    <div
-                      key={location.id}
-                      className='grid grid-cols-[minmax(0,1.4fr)_120px_100px] gap-4 border-t border-white/10 px-4 py-3 first:border-t-0'
-                    >
-                      <div className='truncate text-sm text-white'>
-                        {location.locationName}
-                      </div>
-                      <div className='text-center'>
-                        <span className='inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/75'>
-                          {location.locationType}
-                        </span>
-                      </div>
-                      <div className='text-center text-sm font-semibold text-white'>
-                        {location.quantity}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className='border-t border-white/10 px-6 py-5'>
-              <div className='flex justify-end'>
-                <button
-                  type='button'
-                  onClick={closeLocationsModal}
-                  disabled={locationsLoading}
-                  className='inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60'
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LocationsModal
+          item={locationsItem}
+          locations={locations}
+          loading={locationsLoading}
+          error={locationsError}
+          onClose={closeLocationsModal}
+        />
       ) : null}
 
       {showHistoryModal ? (
@@ -823,10 +663,10 @@ export default function InventoryPage () {
                         {entry.quantityDelta > 0 ? '+' : ''}{entry.quantityDelta}
                       </div>
                       <div className='min-w-0 truncate text-sm text-white'>
-                        {entry.reason || '—'}
+                        {entry.reason || 'Ã¢â‚¬â€'}
                       </div>
                       <div className='min-w-0 truncate text-sm text-white/75'>
-                        {entry.performedByName || entry.performedByEmail || '—'}
+                        {entry.performedByName || entry.performedByEmail || 'Ã¢â‚¬â€'}
                       </div>
                     </div>
                   ))}
