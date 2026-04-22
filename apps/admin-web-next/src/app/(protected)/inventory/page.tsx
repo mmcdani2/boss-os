@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { apiFetch, apiJson } from '@/lib/api/client'
 import InventoryRow from './_components/InventoryRow'
 import LocationsModal from './_components/LocationsModal'
+import HistoryModal from './_components/HistoryModal'
+import ItemFormModal from './_components/ItemFormModal'
 
 type InventoryItem = {
   id: string
@@ -86,7 +88,7 @@ function Card ({
 
 function StatTile ({
   label,
-  value = 'Ã¢â‚¬â€'
+  value = 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'
 }: {
   label: string
   value?: string | number
@@ -609,212 +611,39 @@ export default function InventoryPage () {
           onClose={closeLocationsModal}
         />
       ) : null}
-
       {showHistoryModal ? (
-        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-4 sm:items-center sm:py-6'>
-          <button
-            type='button'
-            aria-label='Close inventory history modal'
-            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
-            onClick={closeHistoryModal}
-          />
-          <div className='relative z-10 flex w-full max-w-3xl max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#171717] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:max-h-[90vh]'>
-            <div className='border-b border-white/10 px-6 py-6'>
-              <SectionKicker>Inventory</SectionKicker>
-              <h3 className='mt-3 text-2xl font-bold text-white'>
-                {historyItem?.name}
-              </h3>
-              <p className='mt-2 text-sm leading-6 text-white/60'>
-                Stock movement history for this item.
-              </p>
-            </div>
-
-            <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6'>
-              {historyLoading ? (
-                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/70'>
-                  Loading history...
-                </div>
-              ) : historyError ? (
-                <div className='rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-4 text-sm text-red-200'>
-                  {historyError}
-                </div>
-              ) : history.length === 0 ? (
-                <div className='rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/60'>
-                  No history found for this item.
-                </div>
-              ) : (
-                <div className='overflow-hidden rounded-2xl border border-white/10'>
-                  <div className='grid grid-cols-[140px_120px_minmax(0,1fr)_160px] gap-4 border-b border-white/10 bg-white/[0.03] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35'>
-                    <div>Date</div>
-                    <div className='text-center'>Change</div>
-                    <div>Reason</div>
-                    <div>User</div>
-                  </div>
-
-                  {history.map(entry => (
-                    <div
-                      key={entry.id}
-                      className='grid grid-cols-[140px_120px_minmax(0,1fr)_160px] gap-4 border-t border-white/10 px-4 py-3 first:border-t-0'
-                    >
-                      <div className='text-sm text-white/75'>
-                        {new Date(entry.createdAt).toLocaleDateString()}
-                      </div>
-                      <div className='text-center text-sm font-semibold text-white'>
-                        {entry.quantityDelta > 0 ? '+' : ''}{entry.quantityDelta}
-                      </div>
-                      <div className='min-w-0 truncate text-sm text-white'>
-                        {entry.reason || 'Ã¢â‚¬â€'}
-                      </div>
-                      <div className='min-w-0 truncate text-sm text-white/75'>
-                        {entry.performedByName || entry.performedByEmail || 'Ã¢â‚¬â€'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className='border-t border-white/10 px-6 py-5'>
-              <div className='flex justify-end'>
-                <button
-                  type='button'
-                  onClick={closeHistoryModal}
-                  disabled={historyLoading}
-                  className='inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60'
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HistoryModal
+          item={historyItem}
+          history={history}
+          loading={historyLoading}
+          error={historyError}
+          onClose={closeHistoryModal}
+        />
       ) : null}
-
-      {showItemModal ? (
-        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-4 sm:items-center sm:py-6'>
-          <button
-            type='button'
-            aria-label='Close inventory item modal'
-            className='absolute inset-0 bg-black/80 backdrop-blur-sm'
-            onClick={closeItemModal}
-          />
-          <div className='relative z-10 flex w-full max-w-2xl max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#171717] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:max-h-[90vh]'>
-            <div className='border-b border-white/10 px-6 py-6'>
-              <SectionKicker>Inventory</SectionKicker>
-              <h3 className='mt-3 text-2xl font-bold text-white'>
-                {editingItem ? 'Edit Item' : 'New Item'}
-              </h3>
-              <p className='mt-2 text-sm leading-6 text-white/60'>
-                {editingItem
-                  ? 'Update the inventory item details.'
-                  : 'Add a new inventory item to the internal stock list.'}
-              </p>
-            </div>
-
-            <form
-              onSubmit={handleSubmitItem}
-              className='grid min-h-0 flex-1 gap-5 overflow-y-auto px-6 py-6'
-            >
-              <div className='grid gap-3 md:grid-cols-2'>
-                <div className='grid gap-2'>
-                  <TextInput
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder='NAME'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <TextInput
-                    value={sku}
-                    onChange={e => setSku(e.target.value)}
-                    placeholder='SKU'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <TextInput
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                    placeholder='CATEGORY'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <TextInput
-                    value={unitOfMeasure}
-                    onChange={e => setUnitOfMeasure(e.target.value)}
-                    placeholder='UNIT OF MEASURE'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <div className='pl-2.5'>
-                    <FieldLabel>Quantity on Hand</FieldLabel>
-                  </div>
-                  <TextInput
-                    value={quantityOnHand}
-                    onChange={e => setQuantityOnHand(e.target.value)}
-                    inputMode='numeric'
-                    placeholder='0'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <div className='pl-2.5'>
-                    <FieldLabel>Reorder Threshold</FieldLabel>
-                  </div>
-                  <TextInput
-                    value={reorderThreshold}
-                    onChange={e => setReorderThreshold(e.target.value)}
-                    inputMode='numeric'
-                    placeholder='0'
-                  />
-                </div>
-              </div>
-
-              <div className='grid gap-3'>
-                <div className='grid gap-2'>
-                  <TextInput
-                    value={storageLocation}
-                    onChange={e => setStorageLocation(e.target.value)}
-                    placeholder='LOCATION'
-                  />
-                </div>
-
-                <div className='grid gap-2'>
-                  <TextArea
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder='Optional notes'
-                  />
-                </div>
-              </div>
-
-              <div className='flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end'>
-                <button
-                  type='button'
-                  onClick={closeItemModal}
-                  disabled={submitting}
-                  className='inline-flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60'
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type='submit'
-                  disabled={submitting}
-                  className='inline-flex h-11 items-center justify-center rounded-2xl bg-orange-500 px-4 text-sm font-bold text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70'
-                >
-                  {submitting
-                    ? editingItem ? 'Saving...' : 'Creating...'
-                    : editingItem ? 'Save Changes' : 'Create Item'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <ItemFormModal
+        isOpen={showItemModal}
+        editingItem={editingItem}
+        name={name}
+        sku={sku}
+        category={category}
+        unitOfMeasure={unitOfMeasure}
+        quantityOnHand={quantityOnHand}
+        reorderThreshold={reorderThreshold}
+        storageLocation={storageLocation}
+        notes={notes}
+        submitting={submitting}
+        error={error}
+        onClose={closeItemModal}
+        onSubmit={handleSubmitItem}
+        setName={setName}
+        setSku={setSku}
+        setCategory={setCategory}
+        setUnitOfMeasure={setUnitOfMeasure}
+        setQuantityOnHand={setQuantityOnHand}
+        setReorderThreshold={setReorderThreshold}
+        setStorageLocation={setStorageLocation}
+        setNotes={setNotes}
+      />
     </div>
   )
 }
