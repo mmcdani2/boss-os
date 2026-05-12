@@ -129,9 +129,7 @@ export default function InventoryToolbar ({
           <h2 className='mt-2 text-2xl font-bold text-white'>
             Current Items
           </h2>
-          <p className='mt-2 text-sm leading-6 text-white/60'>
-            Search, filter, and review stock records from one place.
-          </p>
+
         </div>
 
         <button
